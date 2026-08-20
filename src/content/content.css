@@ -1,0 +1,46 @@
+.immo-boussole-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #2563eb;
+  color: #ffffff !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  z-index: 9999;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  text-decoration: none !important;
+}
+
+.immo-boussole-btn:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.immo-boussole-btn.loading {
+  background-color: #93c5fd;
+  cursor: wait;
+}
+
+.immo-boussole-btn.success {
+  background-color: #10b981;
+}
+
+.immo-boussole-btn.error {
+  background-color: #ef4444;
+}
+
+.immo-boussole-btn-card {
+  margin-top: 6px;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.immo-boussole-detail-wrapper {
+  margin: 12px 0;
+}

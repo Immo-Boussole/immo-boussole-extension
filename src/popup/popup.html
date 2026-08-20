@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Immo-Boussole Extension</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="header">
+    <div class="logo-title">
+      <span class="icon">🧭</span>
+      <h1>Immo-Boussole</h1>
+    </div>
+    <span id="connection-badge" class="badge badge-disconnected">Non connecté</span>
+  </div>
+
+  <div class="card">
+    <h2>Configuration Serveur</h2>
+    <form id="config-form">
+      <div class="form-group">
+        <label for="server-url">URL de votre instance Immo-Boussole</label>
+        <input type="url" id="server-url" placeholder="https://votre-immo-boussole.fr" required />
+      </div>
+
+      <div class="form-group">
+        <label for="api-key">Clé d'API (Bearer Token)</label>
+        <input type="password" id="api-key" placeholder="Entrez votre clé d'API..." required />
+      </div>
+
+      <div class="button-group">
+        <button type="submit" id="btn-save" class="btn btn-primary">Enregistrer</button>
+        <button type="button" id="btn-test" class="btn btn-secondary">Tester la connexion</button>
+      </div>
+    </form>
+    <div id="status-message" class="status-msg"></div>
+  </div>
+
+  <div class="card">
+    <h2>Ajout d'annonce</h2>
+    <p class="subtitle">Ajoutez l'onglet courant ou saisissez une URL d'annonce :</p>
+    <button type="button" id="btn-add-current" class="btn btn-action">
+      ➕ Ajouter l'onglet courant
+    </button>
+    
+    <div class="manual-input">
+      <input type="url" id="manual-url" placeholder="https://www.leboncoin.fr/ad/..." />
+      <button type="button" id="btn-add-manual" class="btn btn-secondary">Ajouter</button>
+    </div>
+    <div id="add-status-message" class="status-msg"></div>
+  </div>
+
+  <script type="module" src="popup.ts"></script>
+</body>
+</html>
