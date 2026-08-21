@@ -325,10 +325,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (resp && resp.success) {
                 addStatusMsg.className = 'status-msg success';
                 addStatusMsg.textContent = resp.message || t('addSuccess');
-                if (resp.immoBoussoleUrl) {
+                const cleanServer = cfg.serverUrl.replace(/\/+$/, '');
+                const targetUrl = resp.immoBoussoleUrl || (cleanServer ? `${cleanServer}/` : undefined);
+                if (targetUrl) {
                     btnViewListing.style.display = 'block';
                     btnViewListing.onclick = () => {
-                        browser.tabs.create({ url: resp.immoBoussoleUrl });
+                        browser.tabs.create({ url: targetUrl });
                     };
                 }
             }

@@ -39,7 +39,7 @@ async function handleAddListing(payload) {
             bodyText.includes('cf-chl')) {
             // Open server URL to let user complete Cloudflare validation
             try {
-                browser.tabs.create({ url: cleanServerUrl });
+                await browser.tabs.create({ url: cleanServerUrl });
             }
             catch (e) {
                 // ignore
@@ -62,7 +62,7 @@ async function handleAddListing(payload) {
                 localizedMsg = t('scrapingStarted');
             }
             let listingId = undefined;
-            let immoBoussoleUrl = undefined;
+            let immoBoussoleUrl = `${cleanServerUrl}/`;
             if (data.data && data.data.listing_id) {
                 listingId = data.data.listing_id;
                 immoBoussoleUrl = `${cleanServerUrl}/listing/${listingId}`;
@@ -70,10 +70,10 @@ async function handleAddListing(payload) {
             else if (data.data && data.data.immo_boussole_url) {
                 immoBoussoleUrl = `${cleanServerUrl}${data.data.immo_boussole_url}`;
             }
-            // Auto-open new tab if option is enabled (enabled by default)
+            // Auto-open new tab if option is enabled (default is true)
             if (config.openTabAfterImport !== false && immoBoussoleUrl) {
                 try {
-                    browser.tabs.create({ url: immoBoussoleUrl });
+                    await browser.tabs.create({ url: immoBoussoleUrl });
                 }
                 catch (e) {
                     console.warn('Could not auto-open listing tab:', e);

@@ -14,7 +14,16 @@ async function sendListingToExtension(payload, btn) {
         });
         if (response && response.success) {
             btn.className = btn.className.replace('loading', '') + ' success';
-            btn.innerHTML = t('btnAdded');
+            btn.innerHTML = `${t('btnViewListing')} ↗`;
+            btn.disabled = false;
+            btn.title = t('btnViewListing');
+            if (response.immoBoussoleUrl) {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.open(response.immoBoussoleUrl, '_blank');
+                };
+            }
         }
         else {
             btn.className = btn.className.replace('loading', '') + ' error';
