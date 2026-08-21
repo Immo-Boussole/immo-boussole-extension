@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Immo-Boussole Extension",
+  "default_locale": "en",
+  "name": "__MSG_extensionName__",
   "version": "1.0.0",
-  "description": "Ajoutez en un clic des annonces immobilières (LeBonCoin, Figaro Immobilier) à votre instance Immo-Boussole.",
+  "description": "__MSG_extensionDesc__",
   "permissions": [
     "storage",
     "activeTab"
@@ -15,7 +16,7 @@
   ],
   "action": {
     "default_popup": "src/popup/popup.html",
-    "default_title": "Immo-Boussole"
+    "default_title": "__MSG_extensionName__"
   },
   "background": {
     "scripts": ["background.js"],

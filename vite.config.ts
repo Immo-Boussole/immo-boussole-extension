@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { copyFileSync, mkdirSync, existsSync } from 'fs';
+import { copyFileSync, cpSync, mkdirSync, existsSync } from 'fs';
 
 export default defineConfig(({ mode }) => {
   return {
@@ -35,6 +35,10 @@ export default defineConfig(({ mode }) => {
           copyFileSync(resolve(__dirname, 'src/manifest.json'), resolve(outDir, 'manifest.json'));
           if (existsSync(resolve(__dirname, 'src/content/content.css'))) {
             copyFileSync(resolve(__dirname, 'src/content/content.css'), resolve(outDir, 'content.css'));
+          }
+          const localesDir = resolve(__dirname, '_locales');
+          if (existsSync(localesDir)) {
+            cpSync(localesDir, resolve(outDir, '_locales'), { recursive: true });
           }
         }
       }

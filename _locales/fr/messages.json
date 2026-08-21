@@ -1,0 +1,134 @@
+{
+  "extensionName": {
+    "message": "Extension Immo-Boussole",
+    "description": "The name of the extension in French"
+  },
+  "extensionDesc": {
+    "message": "Ajoutez en un clic des annonces immobilières (LeBonCoin, Figaro Immobilier) à votre instance Immo-Boussole.",
+    "description": "The description of the extension in French"
+  },
+  "popupTitle": {
+    "message": "Immo-Boussole",
+    "description": "Header title in popup"
+  },
+  "statusConnected": {
+    "message": "Connecté",
+    "description": "Connected badge status"
+  },
+  "statusDisconnected": {
+    "message": "Non connecté",
+    "description": "Disconnected badge status"
+  },
+  "statusAuthError": {
+    "message": "Erreur Auth",
+    "description": "Authentication error status"
+  },
+  "statusOffline": {
+    "message": "Hors ligne",
+    "description": "Server unreachable status"
+  },
+  "configHeader": {
+    "message": "Configuration Serveur",
+    "description": "Header for config section"
+  },
+  "serverUrlLabel": {
+    "message": "URL de votre instance Immo-Boussole",
+    "description": "Label for server URL input"
+  },
+  "apiKeyLabel": {
+    "message": "Clé d'API (Bearer Token)",
+    "description": "Label for API key input"
+  },
+  "apiKeyPlaceholder": {
+    "message": "Entrez votre clé d'API...",
+    "description": "Placeholder for API key input"
+  },
+  "btnSave": {
+    "message": "Enregistrer",
+    "description": "Save button label"
+  },
+  "btnTestConnection": {
+    "message": "Tester la connexion",
+    "description": "Test connection button label"
+  },
+  "configSaved": {
+    "message": "Configuration enregistrée !",
+    "description": "Message shown when config is saved"
+  },
+  "connectionSuccess": {
+    "message": "Connexion à Immo-Boussole réussie !",
+    "description": "Message shown on connection test success"
+  },
+  "missingCredentials": {
+    "message": "Veuillez saisir l'URL et la clé API.",
+    "description": "Error message when inputs are missing"
+  },
+  "addListingHeader": {
+    "message": "Ajout d'annonce",
+    "description": "Header for add listing section"
+  },
+  "addListingSubtitle": {
+    "message": "Ajoutez l'onglet courant ou saisissez une URL d'annonce :",
+    "description": "Subtitle for add listing section"
+  },
+  "btnAddCurrentTab": {
+    "message": "➕ Ajouter l'onglet courant",
+    "description": "Button to add active tab"
+  },
+  "manualUrlPlaceholder": {
+    "message": "https://www.leboncoin.fr/ad/...",
+    "description": "Placeholder for manual URL input"
+  },
+  "btnAddManual": {
+    "message": "Ajouter",
+    "description": "Button to add manual URL"
+  },
+  "invalidUrl": {
+    "message": "Veuillez saisir une URL valide.",
+    "description": "Error message for invalid URL"
+  },
+  "activeTabError": {
+    "message": "Impossible de récupérer l'URL de l'onglet actif.",
+    "description": "Error when tab URL is not found"
+  },
+  "sending": {
+    "message": "Envoi en cours...",
+    "description": "Sending status message"
+  },
+  "addSuccess": {
+    "message": "Annonce ajoutée avec succès à Immo-Boussole !",
+    "description": "Success message when listing is added"
+  },
+  "addError": {
+    "message": "Erreur lors de l'ajout de l'annonce.",
+    "description": "Error message when listing addition fails"
+  },
+  "networkError": {
+    "message": "Erreur réseau. Veuillez vérifier votre connexion.",
+    "description": "Network error message"
+  },
+  "notConfigured": {
+    "message": "L'extension n'est pas configurée. Cliquez sur l'icône de l'extension pour configurer l'URL et la clé d'API.",
+    "description": "Error message when extension is not configured"
+  },
+  "btnAddToImmoBoussole": {
+    "message": "🧭 Ajouter à Immo-Boussole",
+    "description": "Button injected on listing detail page"
+  },
+  "btnImmoBoussoleCard": {
+    "message": "🧭 Immo-Boussole",
+    "description": "Button injected on search cards"
+  },
+  "btnSending": {
+    "message": "⏳ Envoi...",
+    "description": "Button text while sending"
+  },
+  "btnAdded": {
+    "message": "✔ Ajouté !",
+    "description": "Button text on success"
+  },
+  "btnError": {
+    "message": "✖ Erreur",
+    "description": "Button text on error"
+  }
+}

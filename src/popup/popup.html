@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,42 +10,42 @@
   <div class="header">
     <div class="logo-title">
       <span class="icon">🧭</span>
-      <h1>Immo-Boussole</h1>
+      <h1 data-i18n="popupTitle">Immo-Boussole</h1>
     </div>
-    <span id="connection-badge" class="badge badge-disconnected">Non connecté</span>
+    <span id="connection-badge" class="badge badge-disconnected" data-i18n="statusDisconnected">Disconnected</span>
   </div>
 
   <div class="card">
-    <h2>Configuration Serveur</h2>
+    <h2 data-i18n="configHeader">Server Configuration</h2>
     <form id="config-form">
       <div class="form-group">
-        <label for="server-url">URL de votre instance Immo-Boussole</label>
-        <input type="url" id="server-url" placeholder="https://votre-immo-boussole.fr" required />
+        <label for="server-url" data-i18n="serverUrlLabel">Immo-Boussole Instance URL</label>
+        <input type="url" id="server-url" placeholder="https://my-immo-boussole.org" required />
       </div>
 
       <div class="form-group">
-        <label for="api-key">Clé d'API (Bearer Token)</label>
-        <input type="password" id="api-key" placeholder="Entrez votre clé d'API..." required />
+        <label for="api-key" data-i18n="apiKeyLabel">API Key (Bearer Token)</label>
+        <input type="password" id="api-key" data-i18n-placeholder="apiKeyPlaceholder" placeholder="Enter your API key..." required />
       </div>
 
       <div class="button-group">
-        <button type="submit" id="btn-save" class="btn btn-primary">Enregistrer</button>
-        <button type="button" id="btn-test" class="btn btn-secondary">Tester la connexion</button>
+        <button type="submit" id="btn-save" class="btn btn-primary" data-i18n="btnSave">Save</button>
+        <button type="button" id="btn-test" class="btn btn-secondary" data-i18n="btnTestConnection">Test Connection</button>
       </div>
     </form>
     <div id="status-message" class="status-msg"></div>
   </div>
 
   <div class="card">
-    <h2>Ajout d'annonce</h2>
-    <p class="subtitle">Ajoutez l'onglet courant ou saisissez une URL d'annonce :</p>
-    <button type="button" id="btn-add-current" class="btn btn-action">
-      ➕ Ajouter l'onglet courant
+    <h2 data-i18n="addListingHeader">Add Listing</h2>
+    <p class="subtitle" data-i18n="addListingSubtitle">Add the current active tab or enter a listing URL:</p>
+    <button type="button" id="btn-add-current" class="btn btn-action" data-i18n="btnAddCurrentTab">
+      ➕ Add Current Tab
     </button>
     
     <div class="manual-input">
-      <input type="url" id="manual-url" placeholder="https://www.leboncoin.fr/ad/..." />
-      <button type="button" id="btn-add-manual" class="btn btn-secondary">Ajouter</button>
+      <input type="url" id="manual-url" data-i18n-placeholder="manualUrlPlaceholder" placeholder="https://www.leboncoin.fr/ad/..." />
+      <button type="button" id="btn-add-manual" class="btn btn-secondary" data-i18n="btnAddManual">Add</button>
     </div>
     <div id="add-status-message" class="status-msg"></div>
   </div>

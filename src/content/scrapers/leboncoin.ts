@@ -1,4 +1,5 @@
 import { ExternalListingPayload } from '../../types';
+import { t } from '../../i18n';
 
 export function isLeboncoin(): boolean {
   return window.location.hostname.includes('leboncoin.fr');
@@ -72,7 +73,7 @@ export function injectLeboncoinButtons(onAdd: (payload: ExternalListingPayload, 
 
       const btn = document.createElement('button');
       btn.className = 'immo-boussole-btn immo-boussole-detail-btn';
-      btn.innerHTML = '🧭 Ajouter à Immo-Boussole';
+      btn.innerHTML = t('btnAddToImmoBoussole');
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -99,7 +100,8 @@ export function injectLeboncoinButtons(onAdd: (payload: ExternalListingPayload, 
     if (adUrl && adUrl.includes('/ad/')) {
       const btn = document.createElement('button');
       btn.className = 'immo-boussole-btn immo-boussole-btn-card immo-boussole-card-btn';
-      btn.innerHTML = '🧭 Immo-Boussole';
+      btn.innerHTML = t('btnImmoBoussoleCard');
+
       
       btn.addEventListener('click', (e) => {
         e.preventDefault();

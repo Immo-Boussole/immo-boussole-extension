@@ -1,11 +1,12 @@
 import browser from 'webextension-polyfill';
+import { t } from '../i18n';
 import { isLeboncoin, injectLeboncoinButtons } from './scrapers/leboncoin';
 import { isFigaro, injectFigaroButtons } from './scrapers/figaro';
 async function sendListingToExtension(payload, btn) {
     const originalText = btn.innerHTML;
     btn.className = btn.className + ' loading';
     btn.disabled = true;
-    btn.innerHTML = '⏳ Envoi...';
+    btn.innerHTML = t('btnSending');
     try {
         const response = await browser.runtime.sendMessage({
             type: 'ADD_LISTING',
@@ -13,11 +14,11 @@ async function sendListingToExtension(payload, btn) {
         });
         if (response && response.success) {
             btn.className = btn.className.replace('loading', '') + ' success';
-            btn.innerHTML = '✔ Ajouté !';
+            btn.innerHTML = t('btnAdded');
         }
         else {
             btn.className = btn.className.replace('loading', '') + ' error';
-            btn.innerHTML = '✖ ' + (response?.message || 'Erreur');
+            btn.innerHTML = `${t('btnError')}: ${response?.message || t('addError')}`;
             setTimeout(() => {
                 btn.className = btn.className.replace('error', '');
                 btn.innerHTML = originalText;
@@ -27,7 +28,7 @@ async function sendListingToExtension(payload, btn) {
     }
     catch (err) {
         btn.className = btn.className.replace('loading', '') + ' error';
-        btn.innerHTML = '✖ Erreur réseau';
+        btn.innerHTML = `${t('btnError')}: ${t('networkError')}`;
         setTimeout(() => {
             btn.className = btn.className.replace('error', '');
             btn.innerHTML = originalText;

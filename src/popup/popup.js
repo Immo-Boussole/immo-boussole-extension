@@ -1,6 +1,9 @@
 import browser from 'webextension-polyfill';
 import { getStoredConfig, saveStoredConfig } from '../storage';
+import { t, localizeDocument } from '../i18n';
 document.addEventListener('DOMContentLoaded', async () => {
+    // Localize static UI elements
+    localizeDocument();
     const serverUrlInput = document.getElementById('server-url');
     const apiKeyInput = document.getElementById('api-key');
     const configForm = document.getElementById('config-form');
@@ -27,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const apiKey = apiKeyInput.value.trim();
         await saveStoredConfig({ serverUrl, apiKey });
         statusMsg.className = 'status-msg success';
-        statusMsg.textContent = 'Configuration enregistrée !';
+        statusMsg.textContent = t('configSaved');
         checkConnection(serverUrl, apiKey);
     });
     // Test connection
@@ -36,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const apiKey = apiKeyInput.value.trim();
         if (!serverUrl || !apiKey) {
             statusMsg.className = 'status-msg error';
-            statusMsg.textContent = 'Veuillez saisir l\'URL et la clé API.';
+            statusMsg.textContent = t('missingCredentials');
             return;
         }
         await checkConnection(serverUrl, apiKey, true);
@@ -50,12 +53,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             else {
                 addStatusMsg.className = 'status-msg error';
-                addStatusMsg.textContent = 'Impossible de récupérer l\'URL de l\'onglet actif.';
+                addStatusMsg.textContent = t('activeTabError');
             }
         }
         catch (err) {
             addStatusMsg.className = 'status-msg error';
-            addStatusMsg.textContent = err.message || 'Erreur lors de l\'ajout.';
+            addStatusMsg.textContent = err.message || t('addError');
         }
     });
     // Add manual URL
@@ -63,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const url = manualUrlInput.value.trim();
         if (!url) {
             addStatusMsg.className = 'status-msg error';
-            addStatusMsg.textContent = 'Veuillez saisir une URL valide.';
+            addStatusMsg.textContent = t('invalidUrl');
             return;
         }
         await sendUrlToBackend(url);
@@ -78,37 +81,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             if (resp.ok) {
                 badge.className = 'badge badge-connected';
-                badge.textContent = 'Connecté';
+                badge.textContent = t('statusConnected');
                 if (showMsg) {
                     statusMsg.className = 'status-msg success';
-                    statusMsg.textContent = 'Connexion à Immo-Boussole réussie !';
+                    statusMsg.textContent = t('connectionSuccess');
                 }
             }
             else {
                 badge.className = 'badge badge-disconnected';
-                badge.textContent = 'Erreur Auth';
+                badge.textContent = t('statusAuthError');
                 if (showMsg) {
                     statusMsg.className = 'status-msg error';
-                    statusMsg.textContent = `Erreur (${resp.status}): Clé d'API ou URL invalide.`;
+                    statusMsg.textContent = `Error (${resp.status}): ${t('missingCredentials')}`;
                 }
             }
         }
         catch (err) {
             badge.className = 'badge badge-disconnected';
-            badge.textContent = 'Hors ligne';
+            badge.textContent = t('statusOffline');
             if (showMsg) {
                 statusMsg.className = 'status-msg error';
-                statusMsg.textContent = `Impossible de contacter le serveur: ${err.message}`;
+                statusMsg.textContent = `${t('statusOffline')}: ${err.message}`;
             }
         }
     }
     async function sendUrlToBackend(url) {
         addStatusMsg.className = 'status-msg';
-        addStatusMsg.textContent = 'Envoi en cours...';
+        addStatusMsg.textContent = t('sending');
         const cfg = await getStoredConfig();
         if (!cfg.serverUrl || !cfg.apiKey) {
             addStatusMsg.className = 'status-msg error';
-            addStatusMsg.textContent = 'Veuillez configurer l\'URL et la clé API ci-dessus.';
+            addStatusMsg.textContent = t('notConfigured');
             return;
         }
         try {
@@ -118,16 +121,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             if (resp && resp.success) {
                 addStatusMsg.className = 'status-msg success';
-                addStatusMsg.textContent = resp.message || 'Annonce ajoutée avec succès !';
+                addStatusMsg.textContent = resp.message || t('addSuccess');
             }
             else {
                 addStatusMsg.className = 'status-msg error';
-                addStatusMsg.textContent = resp?.message || 'Erreur lors de l\'ajout de l\'annonce.';
+                addStatusMsg.textContent = resp?.message || t('addError');
             }
         }
         catch (err) {
             addStatusMsg.className = 'status-msg error';
-            addStatusMsg.textContent = err.message || 'Erreur réseau.';
+            addStatusMsg.textContent = err.message || t('networkError');
         }
     }
 });

@@ -1,0 +1,134 @@
+{
+  "extensionName": {
+    "message": "Immo-Boussole Extension",
+    "description": "The name of the extension"
+  },
+  "extensionDesc": {
+    "message": "One-click add real estate listings (LeBonCoin, Figaro Immobilier) to your Immo-Boussole instance.",
+    "description": "The description of the extension"
+  },
+  "popupTitle": {
+    "message": "Immo-Boussole",
+    "description": "Header title in popup"
+  },
+  "statusConnected": {
+    "message": "Connected",
+    "description": "Connected badge status"
+  },
+  "statusDisconnected": {
+    "message": "Disconnected",
+    "description": "Disconnected badge status"
+  },
+  "statusAuthError": {
+    "message": "Auth Error",
+    "description": "Authentication error status"
+  },
+  "statusOffline": {
+    "message": "Offline",
+    "description": "Server unreachable status"
+  },
+  "configHeader": {
+    "message": "Server Configuration",
+    "description": "Header for config section"
+  },
+  "serverUrlLabel": {
+    "message": "Immo-Boussole Instance URL",
+    "description": "Label for server URL input"
+  },
+  "apiKeyLabel": {
+    "message": "API Key (Bearer Token)",
+    "description": "Label for API key input"
+  },
+  "apiKeyPlaceholder": {
+    "message": "Enter your API key...",
+    "description": "Placeholder for API key input"
+  },
+  "btnSave": {
+    "message": "Save",
+    "description": "Save button label"
+  },
+  "btnTestConnection": {
+    "message": "Test Connection",
+    "description": "Test connection button label"
+  },
+  "configSaved": {
+    "message": "Configuration saved!",
+    "description": "Message shown when config is saved"
+  },
+  "connectionSuccess": {
+    "message": "Successfully connected to Immo-Boussole!",
+    "description": "Message shown on connection test success"
+  },
+  "missingCredentials": {
+    "message": "Please enter both the server URL and API key.",
+    "description": "Error message when inputs are missing"
+  },
+  "addListingHeader": {
+    "message": "Add Listing",
+    "description": "Header for add listing section"
+  },
+  "addListingSubtitle": {
+    "message": "Add the current active tab or enter a listing URL:",
+    "description": "Subtitle for add listing section"
+  },
+  "btnAddCurrentTab": {
+    "message": "➕ Add Current Tab",
+    "description": "Button to add active tab"
+  },
+  "manualUrlPlaceholder": {
+    "message": "https://www.leboncoin.fr/ad/...",
+    "description": "Placeholder for manual URL input"
+  },
+  "btnAddManual": {
+    "message": "Add",
+    "description": "Button to add manual URL"
+  },
+  "invalidUrl": {
+    "message": "Please enter a valid URL.",
+    "description": "Error message for invalid URL"
+  },
+  "activeTabError": {
+    "message": "Unable to get current active tab URL.",
+    "description": "Error when tab URL is not found"
+  },
+  "sending": {
+    "message": "Sending...",
+    "description": "Sending status message"
+  },
+  "addSuccess": {
+    "message": "Listing successfully added to Immo-Boussole!",
+    "description": "Success message when listing is added"
+  },
+  "addError": {
+    "message": "Error adding listing.",
+    "description": "Error message when listing addition fails"
+  },
+  "networkError": {
+    "message": "Network error. Please check your connection.",
+    "description": "Network error message"
+  },
+  "notConfigured": {
+    "message": "Extension is not configured. Click the extension icon to set your Server URL and API key.",
+    "description": "Error message when extension is not configured"
+  },
+  "btnAddToImmoBoussole": {
+    "message": "🧭 Add to Immo-Boussole",
+    "description": "Button injected on listing detail page"
+  },
+  "btnImmoBoussoleCard": {
+    "message": "🧭 Immo-Boussole",
+    "description": "Button injected on search cards"
+  },
+  "btnSending": {
+    "message": "⏳ Sending...",
+    "description": "Button text while sending"
+  },
+  "btnAdded": {
+    "message": "✔ Added!",
+    "description": "Button text on success"
+  },
+  "btnError": {
+    "message": "✖ Error",
+    "description": "Button text on error"
+  }
+}

@@ -1,59 +1,73 @@
-# Extension Navigateur Immo-Boussole (Firefox, Chrome, Edge)
+# Immo-Boussole WebExtension (Firefox, Chrome, Edge)
 
-Extension navigateur officielle pour **Immo-Boussole**, compatible avec **Firefox**, **Chrome** et **Microsoft Edge**.
-
----
-
-## 🌟 Fonctionnalités
-
-- **Boutons intégrés** : Inscription automatique de boutons *"🧭 Ajouter à Immo-Boussole"* sur chaque carte d'annonce (pages de recherche) et sur les pages détaillées des plateformes immobilières (**LeBonCoin**, **Figaro Immobilier**).
-- **Pré-extraction intelligente** : Capture en temps réel du titre, prix, surface, pièces, photos et URL sans dépendre uniquement des requêtes serveurs.
-- **Stockage sécurisé** : L'URL de votre serveur et votre clé d'API (Bearer Token) sont conservées dans le stockage local sécurisé du navigateur (`browser.storage.local`).
-- **Popup de contrôle** : Interface claire dans la barre d'outils pour tester la connexion, configurer vos accès et ajouter l'onglet actif en un clic.
+Official browser extension for **Immo-Boussole**, compatible with **Firefox**, **Google Chrome**, and **Microsoft Edge**.
 
 ---
 
-## 🚀 Installation & Développement
+## 🌐 Languages
 
-### Dépendances
+- [English (Default)](README.md)
+- [Français](README.fr.md)
+
+---
+
+## 🌟 Features
+
+- **Integrated Action Buttons**: Automatically injects *"🧭 Add to Immo-Boussole"* buttons on listing cards in search results and directly on property detail pages across supported platforms (**LeBonCoin**, **Figaro Immobilier**).
+- **Smart DOM Pre-extraction**: Instantly captures title, price, area, rooms, photos, and URL without relying solely on backend network scrapers.
+- **Secure Local Storage**: Instance server URL and Bearer API Token are safely preserved in browser-isolated local storage (`browser.storage.local`).
+- **Control Popup**: Toolbar popup allowing live connection health checks, credentials setup, and single-click capture of the active browser tab.
+- **Multi-language (i18n)**: Automatically detects browser UI language (English default, French included). Easily extensible by the community ([TRANSLATING.md](TRANSLATING.md)).
+
+---
+
+## 🚀 Installation & Development
+
+### Dependencies
 
 ```bash
 npm install
 ```
 
-### Compilation
+### Build
 
-- **Pour Firefox** :
+- **For Firefox**:
   ```bash
   npm run build:firefox
   ```
-  Le dossier compilé sera disponible dans `dist-firefox/`.
+  The compiled extension is output to `dist-firefox/`.
 
-- **Pour Chrome & Edge** :
+- **For Chrome & Edge**:
   ```bash
   npm run build:chrome
   ```
-  Le dossier compilé sera disponible dans `dist-chrome/`.
+  The compiled extension is output to `dist-chrome/`.
 
 ---
 
-## 🦊 Charger l'extension dans Firefox (Développement)
+## 🦊 Load Temporary Extension in Firefox (Development)
 
-1. Ouvrez Firefox et accédez à `about:debugging#/runtime/this-firefox`.
-2. Cliquez sur **"Charger un module d'extension temporaire..."**.
-3. Sélectionnez le fichier `manifest.json` dans le dossier `dist-firefox/`.
-
----
-
-## 🌐 Charger l'extension dans Chrome / Edge (Développement)
-
-1. Ouvrez Chrome/Edge et accédez à `chrome://extensions` ou `edge://extensions`.
-2. Activez le **Mode développeur** (interrupteur en haut à droite).
-3. Cliquez sur **"Charger l'extension non paquetée"** (*Load unpacked*).
-4. Sélectionnez le dossier `dist-chrome/`.
+1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`.
+2. Click **"Load Temporary Add-on..."**.
+3. Select `dist-firefox/manifest.json`.
 
 ---
 
-## 🔐 Sécurité
+## 🌐 Load Unpacked Extension in Chrome / Edge (Development)
 
-L'extension utilise des clés d'API (tokens d'accès individuels) générées dans l'interface Immo-Boussole. Les identifiants ne sont transmis qu'à votre propre instance via des canaux HTTPS sécurisés.
+1. Open Chrome/Edge and navigate to `chrome://extensions` or `edge://extensions`.
+2. Enable **Developer mode** (top-right toggle).
+3. Click **"Load unpacked"**.
+4. Select the `dist-chrome/` folder.
+
+---
+
+## 🌍 Community Translations
+
+Want to add your language? See [TRANSLATING.md](TRANSLATING.md) for a quick step-by-step guide!
+
+---
+
+## 🔐 Security
+
+The extension interacts exclusively with your designated Immo-Boussole server instance via authenticated REST API tokens.

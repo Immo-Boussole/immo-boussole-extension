@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 export function isFigaro() {
     return window.location.hostname.includes('lefigaro.fr');
 }
@@ -50,7 +51,7 @@ export function injectFigaroButtons(onAdd) {
             wrapper.className = 'immo-boussole-detail-wrapper';
             const btn = document.createElement('button');
             btn.className = 'immo-boussole-btn immo-boussole-detail-btn';
-            btn.innerHTML = '🧭 Ajouter à Immo-Boussole';
+            btn.innerHTML = t('btnAddToImmoBoussole');
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -70,7 +71,7 @@ export function injectFigaroButtons(onAdd) {
         if (linkEl && linkEl.href) {
             const btn = document.createElement('button');
             btn.className = 'immo-boussole-btn immo-boussole-btn-card immo-boussole-card-btn';
-            btn.innerHTML = '🧭 Immo-Boussole';
+            btn.innerHTML = t('btnImmoBoussoleCard');
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
