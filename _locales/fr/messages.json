@@ -186,5 +186,29 @@
   "btnError": {
     "message": "✖ Erreur",
     "description": "Button text on error"
+  },
+  "scrapingStarted": {
+    "message": "Tâche de récupération lancée en arrière-plan.",
+    "description": "Message when background scraping task is initiated"
+  },
+  "unknownMessageType": {
+    "message": "Type de message inconnu.",
+    "description": "Error for unknown extension message"
+  },
+  "serverError": {
+    "message": "Erreur du serveur",
+    "description": "Server error label"
+  },
+  "invalidJsonResponse": {
+    "message": "Réponse invalide du serveur (non-JSON).",
+    "description": "Error when server returns non-JSON"
+  },
+  "connectionError": {
+    "message": "Erreur de connexion",
+    "description": "Connection error prefix"
+  },
+  "serverUnreachable": {
+    "message": "Impossible de joindre Immo-Boussole.",
+    "description": "Error when server is unreachable"
   }
 }

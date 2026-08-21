@@ -1,10 +1,11 @@
 import browser from 'webextension-polyfill';
 import { getStoredConfig } from '../storage';
+import { t } from '../i18n';
 browser.runtime.onMessage.addListener(async (message, sender) => {
     if (message.type === 'ADD_LISTING') {
         return await handleAddListing(message.payload);
     }
-    return { success: false, message: 'Type de message inconnu.' };
+    return { success: false, message: t('unknownMessageType') };
 });
 async function handleAddListing(payload) {
     try {
@@ -12,7 +13,7 @@ async function handleAddListing(payload) {
         if (!config.serverUrl || !config.apiKey) {
             return {
                 success: false,
-                message: 'L\'extension n\'est pas configurée. Cliquez sur l\'icône Immo-Boussole pour configurer l\'URL et la clé d\'API.'
+                message: t('notConfigured')
             };
         }
         const cleanServerUrl = config.serverUrl.replace(/\/+$/, '');
@@ -45,33 +46,37 @@ async function handleAddListing(payload) {
             }
             return {
                 success: false,
-                message: 'Protection Cloudflare détectée. Un onglet a été ouvert pour valider l\'accès.'
+                message: t('cloudflareDetected')
             };
         }
         if (!response.ok) {
             return {
                 success: false,
-                message: `Erreur du serveur (${response.status}): ${bodyText || response.statusText}`
+                message: `${t('serverError')} (${response.status}): ${bodyText || response.statusText}`
             };
         }
         try {
             const data = JSON.parse(bodyText);
+            let localizedMsg = data.message;
+            if (data.message === 'Scraping task started in background.') {
+                localizedMsg = t('scrapingStarted');
+            }
             return {
                 success: true,
-                message: data.message || 'Annonce transmise avec succès à Immo-Boussole !'
+                message: localizedMsg || t('addSuccess')
             };
         }
         catch {
             return {
                 success: false,
-                message: 'Réponse invalide du serveur (non-JSON).'
+                message: t('invalidJsonResponse')
             };
         }
     }
     catch (error) {
         return {
             success: false,
-            message: `Erreur de connexion: ${error.message || 'Impossible de joindre Immo-Boussole.'}`
+            message: `${t('connectionError')}: ${error.message || t('serverUnreachable')}`
         };
     }
 }
