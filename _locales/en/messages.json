@@ -27,9 +27,21 @@
     "message": "Offline",
     "description": "Server unreachable status"
   },
+  "statusCloudflare": {
+    "message": "Cloudflare / WAF",
+    "description": "Cloudflare challenge detected status"
+  },
   "configHeader": {
     "message": "Server Configuration",
     "description": "Header for config section"
+  },
+  "tabApiKey": {
+    "message": "API Key",
+    "description": "Tab for API Key authentication"
+  },
+  "tabUserPass": {
+    "message": "Username & Password",
+    "description": "Tab for Username and Password authentication"
   },
   "serverUrlLabel": {
     "message": "Immo-Boussole Instance URL",
@@ -43,9 +55,29 @@
     "message": "Enter your API key...",
     "description": "Placeholder for API key input"
   },
+  "usernameLabel": {
+    "message": "Username",
+    "description": "Label for username input"
+  },
+  "usernamePlaceholder": {
+    "message": "Enter username...",
+    "description": "Placeholder for username input"
+  },
+  "passwordLabel": {
+    "message": "Password",
+    "description": "Label for password input"
+  },
+  "passwordPlaceholder": {
+    "message": "Enter password...",
+    "description": "Placeholder for password input"
+  },
   "btnSave": {
     "message": "Save",
     "description": "Save button label"
+  },
+  "btnLogin": {
+    "message": "Log In & Connect",
+    "description": "Login button label"
   },
   "btnTestConnection": {
     "message": "Test Connection",
@@ -55,6 +87,14 @@
     "message": "Configuration saved!",
     "description": "Message shown when config is saved"
   },
+  "loginSuccess": {
+    "message": "Login successful! Connected to Immo-Boussole.",
+    "description": "Message shown when login succeeds"
+  },
+  "loginFailed": {
+    "message": "Login failed: Invalid username or password.",
+    "description": "Error message when login fails"
+  },
   "connectionSuccess": {
     "message": "Successfully connected to Immo-Boussole!",
     "description": "Message shown on connection test success"
@@ -62,6 +102,18 @@
   "missingCredentials": {
     "message": "Please enter both the server URL and API key.",
     "description": "Error message when inputs are missing"
+  },
+  "missingLoginFields": {
+    "message": "Please enter server URL, username, and password.",
+    "description": "Error message when login fields are missing"
+  },
+  "cloudflareDetected": {
+    "message": "Cloudflare protection detected. A new tab was opened to pass the challenge. Solve it in your browser and click Retry below.",
+    "description": "Message shown when Cloudflare challenge is encountered"
+  },
+  "btnRetry": {
+    "message": "🔄 Retry Connection",
+    "description": "Retry connection button label"
   },
   "addListingHeader": {
     "message": "Add Listing",

@@ -15,24 +15,58 @@
     <span id="connection-badge" class="badge badge-disconnected" data-i18n="statusDisconnected">Disconnected</span>
   </div>
 
+  <!-- Cloudflare Alert Banner (hidden by default) -->
+  <div id="cloudflare-banner" class="cloudflare-alert" style="display: none;">
+    <div class="cf-icon">🛡️</div>
+    <div class="cf-text" data-i18n="cloudflareDetected">Cloudflare protection detected. A new tab was opened. Solve the verification and click Retry.</div>
+    <button type="button" id="btn-retry-cf" class="btn btn-warning btn-sm" data-i18n="btnRetry">🔄 Retry Connection</button>
+  </div>
+
   <div class="card">
     <h2 data-i18n="configHeader">Server Configuration</h2>
-    <form id="config-form">
-      <div class="form-group">
-        <label for="server-url" data-i18n="serverUrlLabel">Immo-Boussole Instance URL</label>
-        <input type="url" id="server-url" placeholder="https://my-immo-boussole.org" required />
-      </div>
+    
+    <div class="form-group">
+      <label for="server-url" data-i18n="serverUrlLabel">Immo-Boussole Instance URL</label>
+      <input type="url" id="server-url" placeholder="https://my-immo-boussole.org" required />
+    </div>
 
-      <div class="form-group">
-        <label for="api-key" data-i18n="apiKeyLabel">API Key (Bearer Token)</label>
-        <input type="password" id="api-key" data-i18n-placeholder="apiKeyPlaceholder" placeholder="Enter your API key..." required />
-      </div>
+    <!-- Auth Tabs Switcher -->
+    <div class="tabs-nav">
+      <button type="button" id="tab-btn-apikey" class="tab-btn active" data-i18n="tabApiKey">API Key</button>
+      <button type="button" id="tab-btn-userpass" class="tab-btn" data-i18n="tabUserPass">Username & Password</button>
+    </div>
 
-      <div class="button-group">
-        <button type="submit" id="btn-save" class="btn btn-primary" data-i18n="btnSave">Save</button>
-        <button type="button" id="btn-test" class="btn btn-secondary" data-i18n="btnTestConnection">Test Connection</button>
-      </div>
-    </form>
+    <!-- Pane 1: API Key -->
+    <div id="tab-pane-apikey" class="tab-pane active">
+      <form id="apikey-form">
+        <div class="form-group">
+          <label for="api-key" data-i18n="apiKeyLabel">API Key (Bearer Token)</label>
+          <input type="password" id="api-key" data-i18n-placeholder="apiKeyPlaceholder" placeholder="Enter your API key..." />
+        </div>
+        <div class="button-group">
+          <button type="submit" id="btn-save" class="btn btn-primary" data-i18n="btnSave">Save</button>
+          <button type="button" id="btn-test" class="btn btn-secondary" data-i18n="btnTestConnection">Test Connection</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Pane 2: Username & Password -->
+    <div id="tab-pane-userpass" class="tab-pane" style="display: none;">
+      <form id="userpass-form">
+        <div class="form-group">
+          <label for="username" data-i18n="usernameLabel">Username</label>
+          <input type="text" id="username" data-i18n-placeholder="usernamePlaceholder" placeholder="Enter username..." autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label for="password" data-i18n="passwordLabel">Password</label>
+          <input type="password" id="password" data-i18n-placeholder="passwordPlaceholder" placeholder="Enter password..." autocomplete="current-password" />
+        </div>
+        <div class="button-group">
+          <button type="submit" id="btn-login" class="btn btn-primary" data-i18n="btnLogin">Log In & Connect</button>
+        </div>
+      </form>
+    </div>
+
     <div id="status-message" class="status-msg"></div>
   </div>
 

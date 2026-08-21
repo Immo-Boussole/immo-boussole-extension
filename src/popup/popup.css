@@ -181,3 +181,84 @@ body {
 .status-msg.error {
   color: var(--error-color);
 }
+
+/* Tabs Navigation */
+.tabs-nav {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 12px;
+  gap: 4px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--primary-color);
+}
+
+.tab-btn.active {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.tab-pane {
+  display: block;
+}
+
+/* Cloudflare Alert Banner */
+.cloudflare-alert {
+  background-color: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+  color: #92400e;
+}
+
+.cloudflare-alert .cf-icon {
+  font-size: 16px;
+}
+
+.cloudflare-alert .cf-text {
+  line-height: 1.4;
+}
+
+.btn-warning {
+  background-color: #f59e0b;
+  color: #ffffff;
+  border: none;
+}
+
+.btn-warning:hover {
+  background-color: #d97706;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 11px;
+  align-self: flex-start;
+}
+
+.badge-cloudflare {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+
+.status-msg.error {
+  color: var(--error-color);
+}

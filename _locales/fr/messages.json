@@ -27,9 +27,21 @@
     "message": "Hors ligne",
     "description": "Server unreachable status"
   },
+  "statusCloudflare": {
+    "message": "Cloudflare / WAF",
+    "description": "Cloudflare challenge detected status"
+  },
   "configHeader": {
     "message": "Configuration Serveur",
     "description": "Header for config section"
+  },
+  "tabApiKey": {
+    "message": "Clé d'API",
+    "description": "Tab for API Key authentication"
+  },
+  "tabUserPass": {
+    "message": "Identifiant & Mot de passe",
+    "description": "Tab for Username and Password authentication"
   },
   "serverUrlLabel": {
     "message": "URL de votre instance Immo-Boussole",
@@ -43,9 +55,29 @@
     "message": "Entrez votre clé d'API...",
     "description": "Placeholder for API key input"
   },
+  "usernameLabel": {
+    "message": "Identifiant (Nom d'utilisateur)",
+    "description": "Label for username input"
+  },
+  "usernamePlaceholder": {
+    "message": "Entrez votre identifiant...",
+    "description": "Placeholder for username input"
+  },
+  "passwordLabel": {
+    "message": "Mot de passe",
+    "description": "Label for password input"
+  },
+  "passwordPlaceholder": {
+    "message": "Entrez votre mot de passe...",
+    "description": "Placeholder for password input"
+  },
   "btnSave": {
     "message": "Enregistrer",
     "description": "Save button label"
+  },
+  "btnLogin": {
+    "message": "Se connecter",
+    "description": "Login button label"
   },
   "btnTestConnection": {
     "message": "Tester la connexion",
@@ -55,6 +87,14 @@
     "message": "Configuration enregistrée !",
     "description": "Message shown when config is saved"
   },
+  "loginSuccess": {
+    "message": "Connexion réussie ! Connecté à Immo-Boussole.",
+    "description": "Message shown when login succeeds"
+  },
+  "loginFailed": {
+    "message": "Échec de connexion : Identifiant ou mot de passe invalide.",
+    "description": "Error message when login fails"
+  },
   "connectionSuccess": {
     "message": "Connexion à Immo-Boussole réussie !",
     "description": "Message shown on connection test success"
@@ -62,6 +102,18 @@
   "missingCredentials": {
     "message": "Veuillez saisir l'URL et la clé API.",
     "description": "Error message when inputs are missing"
+  },
+  "missingLoginFields": {
+    "message": "Veuillez renseigner l'URL, l'identifiant et le mot de passe.",
+    "description": "Error message when login fields are missing"
+  },
+  "cloudflareDetected": {
+    "message": "Protection Cloudflare détectée. Un nouvel onglet a été ouvert pour valider le challenge. Validez-le dans votre navigateur puis cliquez sur Réessayer ci-dessous.",
+    "description": "Message shown when Cloudflare challenge is encountered"
+  },
+  "btnRetry": {
+    "message": "🔄 Réessayer la connexion",
+    "description": "Retry connection button label"
   },
   "addListingHeader": {
     "message": "Ajout d'annonce",
