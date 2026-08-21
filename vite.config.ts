@@ -40,6 +40,10 @@ export default defineConfig(({ mode }) => {
           if (existsSync(localesDir)) {
             cpSync(localesDir, resolve(outDir, '_locales'), { recursive: true });
           }
+          const iconsDir = resolve(__dirname, 'public/icons');
+          if (existsSync(iconsDir)) {
+            cpSync(iconsDir, resolve(outDir, 'icons'), { recursive: true });
+          }
         }
       }
     ]
