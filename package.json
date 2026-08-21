@@ -1,12 +1,13 @@
 {
   "name": "immo-boussole-extension",
   "version": "1.0.0",
+  "type": "module",
   "description": "Browser extension for Firefox, Chrome, and Edge to submit listings to Immo-Boussole",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "build:firefox": "tsc && vite build --mode firefox",
-    "build:chrome": "tsc && vite build --mode chrome",
+    "build": "tsc && node scripts/build.js chrome && node scripts/build.js firefox",
+    "build:firefox": "tsc && node scripts/build.js firefox",
+    "build:chrome": "tsc && node scripts/build.js chrome",
     "package": "node scripts/package.js"
   },
   "dependencies": {
