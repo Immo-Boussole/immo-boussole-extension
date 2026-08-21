@@ -29,6 +29,7 @@ async function handleAddListing(payload: ExternalListingPayload) {
 
     const response = await fetch(endpoint, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${config.apiKey}`
@@ -36,19 +37,46 @@ async function handleAddListing(payload: ExternalListingPayload) {
       body: JSON.stringify(payload)
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
+    const bodyText = await response.text();
+
+    // Check Cloudflare interception
+    if (
+      response.redirected && (response.url.includes('cloudflareaccess.com') || response.url.includes('cloudflare.com')) ||
+      bodyText.includes('cloudflare') ||
+      bodyText.includes('challenge-platform') ||
+      bodyText.includes('cf-chl')
+    ) {
+      // Open server URL to let user complete Cloudflare validation
+      try {
+        browser.tabs.create({ url: cleanServerUrl });
+      } catch (e) {
+        // ignore
+      }
       return {
         success: false,
-        message: `Erreur du serveur (${response.status}): ${errText || response.statusText}`
+        message: 'Protection Cloudflare détectée. Un onglet a été ouvert pour valider l\'accès.'
       };
     }
 
-    const data = await response.json();
-    return {
-      success: true,
-      message: data.message || 'Annonce transmise avec succès à Immo-Boussole !'
-    };
+    if (!response.ok) {
+      return {
+        success: false,
+        message: `Erreur du serveur (${response.status}): ${bodyText || response.statusText}`
+      };
+    }
+
+    try {
+      const data = JSON.parse(bodyText);
+      return {
+        success: true,
+        message: data.message || 'Annonce transmise avec succès à Immo-Boussole !'
+      };
+    } catch {
+      return {
+        success: false,
+        message: 'Réponse invalide du serveur (non-JSON).'
+      };
+    }
   } catch (error: any) {
     return {
       success: false,

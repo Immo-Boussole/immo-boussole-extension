@@ -56,6 +56,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (config.apiKey && config.serverUrl) {
     checkConnection(config.serverUrl, config.apiKey);
+  } else if (config.username && !config.apiKey) {
+    switchTab('userpass');
   }
 
   // Save API Key config
@@ -96,20 +98,34 @@ document.addEventListener('DOMContentLoaded', async () => {
       const cleanUrl = serverUrl.replace(/\/+$/, '');
       const resp = await fetch(`${cleanUrl}/api/v1/auth/login`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
 
       const bodyText = await resp.text();
 
-      // Check Cloudflare
-      if (isCloudflareResponse(resp.status, bodyText)) {
+      // Check Cloudflare / WAF
+      if (isCloudflareResponse(resp, bodyText)) {
         handleCloudflareChallenge(cleanUrl);
         return;
       }
 
-      if (resp.ok) {
-        const data = JSON.parse(bodyText);
+      let data: any = null;
+      try {
+        data = JSON.parse(bodyText);
+      } catch {
+        if (bodyText.includes('<html') || bodyText.includes('<!DOCTYPE')) {
+          statusMsg.className = 'status-msg error';
+          statusMsg.textContent = 'Le serveur a renvoyé une page HTML. Vérifiez l\'URL ou la protection d\'accès de votre instance.';
+        } else {
+          statusMsg.className = 'status-msg error';
+          statusMsg.textContent = `Erreur (${resp.status}): Réponse invalide du serveur.`;
+        }
+        return;
+      }
+
+      if (resp.ok && data && data.api_key) {
         const apiKey = data.api_key;
         apiKeyInput.value = apiKey;
 
@@ -122,10 +138,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         switchTab('apikey');
       } else {
         statusMsg.className = 'status-msg error';
-        statusMsg.textContent = t('loginFailed');
+        statusMsg.textContent = (data && data.detail) ? data.detail : t('loginFailed');
       }
     } catch (err: any) {
-      // Check if network error is related to Cloudflare challenge
       if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
         handleCloudflareChallenge(serverUrl);
       } else {
@@ -186,18 +201,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     await sendUrlToBackend(url);
   });
 
-  function isCloudflareResponse(status: number, text: string): boolean {
-    if (status === 403 || status === 503 || status === 429) {
-      const lower = text.toLowerCase();
-      if (
-        lower.includes('cloudflare') ||
-        lower.includes('cf-chl') ||
-        lower.includes('challenge-platform') ||
-        lower.includes('just a moment...') ||
-        lower.includes('ray id')
-      ) {
-        return true;
-      }
+  function isCloudflareResponse(resp: Response, text: string): boolean {
+    if (resp.redirected && (resp.url.includes('cloudflareaccess.com') || resp.url.includes('cloudflare.com'))) {
+      return true;
+    }
+    const lower = text.toLowerCase();
+    if (
+      lower.includes('cloudflareaccess.com') ||
+      lower.includes('cloudflare-access') ||
+      lower.includes('cf-access') ||
+      lower.includes('cf-chl') ||
+      lower.includes('challenge-platform') ||
+      lower.includes('just a moment...') ||
+      lower.includes('ray id') ||
+      lower.includes('<center>cloudflare</center>')
+    ) {
+      return true;
+    }
+    if (resp.status === 403 || resp.status === 503 || resp.status === 429) {
+      return true;
     }
     return false;
   }
@@ -225,6 +247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const cleanUrl = serverUrl.replace(/\/+$/, '');
       const resp = await fetch(`${cleanUrl}/api/v1/listings/?limit=1`, {
+        credentials: 'include',
         headers: {
           'Authorization': `Bearer ${apiKey}`
         }
@@ -232,7 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const bodyText = await resp.text();
 
-      if (isCloudflareResponse(resp.status, bodyText)) {
+      if (isCloudflareResponse(resp, bodyText)) {
         handleCloudflareChallenge(cleanUrl);
         return;
       }
