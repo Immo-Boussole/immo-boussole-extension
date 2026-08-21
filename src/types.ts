@@ -2,6 +2,7 @@ export interface ExtensionConfig {
   serverUrl: string;
   apiKey: string;
   username?: string;
+  activeTab?: 'apikey' | 'userpass';
 }
 
 export interface ExternalListingPayload {

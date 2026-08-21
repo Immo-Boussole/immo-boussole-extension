@@ -31,10 +31,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabPaneApiKey = document.getElementById('tab-pane-apikey') as HTMLDivElement;
   const tabPaneUserPass = document.getElementById('tab-pane-userpass') as HTMLDivElement;
 
-  tabBtnApiKey.addEventListener('click', () => switchTab('apikey'));
-  tabBtnUserPass.addEventListener('click', () => switchTab('userpass'));
+  tabBtnApiKey.addEventListener('click', () => switchTab('apikey', true));
+  tabBtnUserPass.addEventListener('click', () => switchTab('userpass', true));
 
-  function switchTab(tab: 'apikey' | 'userpass') {
+  function switchTab(tab: 'apikey' | 'userpass', persist = false) {
     if (tab === 'apikey') {
       tabBtnApiKey.classList.add('active');
       tabBtnUserPass.classList.remove('active');
@@ -46,6 +46,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       tabPaneUserPass.style.display = 'block';
       tabPaneApiKey.style.display = 'none';
     }
+    if (persist) {
+      saveStoredConfig({ activeTab: tab });
+    }
   }
 
   // Load existing config
@@ -54,13 +57,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (config.apiKey) apiKeyInput.value = config.apiKey;
   if (config.username) usernameInput.value = config.username;
 
-  if (config.apiKey && config.serverUrl) {
-    checkConnection(config.serverUrl, config.apiKey);
-  } else if (config.username && !config.apiKey) {
+  // Restore active tab
+  if (config.activeTab) {
+    switchTab(config.activeTab);
+  } else if (config.apiKey) {
+    switchTab('apikey');
+  } else {
     switchTab('userpass');
   }
 
-  // Save API Key config
+  // Live auto-save on typing for all configuration fields
+  serverUrlInput.addEventListener('input', () => {
+    saveStoredConfig({ serverUrl: serverUrlInput.value.trim() });
+  });
+
+  apiKeyInput.addEventListener('input', () => {
+    saveStoredConfig({ apiKey: apiKeyInput.value.trim() });
+  });
+
+  usernameInput.addEventListener('input', () => {
+    saveStoredConfig({ username: usernameInput.value.trim() });
+  });
+
+  if (config.apiKey && config.serverUrl) {
+    checkConnection(config.serverUrl, config.apiKey);
+  }
+
+  // Save API Key config explicitly
   apikeyForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const serverUrl = serverUrlInput.value.trim();
@@ -72,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    await saveStoredConfig({ serverUrl, apiKey, username: config.username });
+    await saveStoredConfig({ serverUrl, apiKey, activeTab: 'apikey' });
     statusMsg.className = 'status-msg success';
     statusMsg.textContent = t('configSaved');
     checkConnection(serverUrl, apiKey);
@@ -84,6 +107,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const serverUrl = serverUrlInput.value.trim();
     const username = usernameInput.value.trim();
     const password = passwordInput.value;
+
+    // Immediately persist serverUrl and username before network call
+    await saveStoredConfig({ serverUrl, username, activeTab: 'userpass' });
 
     if (!serverUrl || !username || !password) {
       statusMsg.className = 'status-msg error';
@@ -129,13 +155,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const apiKey = data.api_key;
         apiKeyInput.value = apiKey;
 
-        await saveStoredConfig({ serverUrl: cleanUrl, apiKey, username });
+        await saveStoredConfig({ serverUrl: cleanUrl, apiKey, username, activeTab: 'apikey' });
         statusMsg.className = 'status-msg success';
         statusMsg.textContent = t('loginSuccess');
         hideCloudflareBanner();
         badge.className = 'badge badge-connected';
         badge.textContent = t('statusConnected');
-        switchTab('apikey');
+        switchTab('apikey', true);
       } else {
         statusMsg.className = 'status-msg error';
         statusMsg.textContent = (data && data.detail) ? data.detail : t('loginFailed');
@@ -169,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (serverUrl && apiKey) {
       await checkConnection(serverUrl, apiKey, true);
     } else if (serverUrl) {
-      switchTab('userpass');
+      switchTab('userpass', true);
       statusMsg.textContent = 'Veuillez vous reconnecter.';
     }
   });
