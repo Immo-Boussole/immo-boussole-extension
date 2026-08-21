@@ -95,6 +95,10 @@
     "message": "Échec de connexion : Identifiant ou mot de passe invalide.",
     "description": "Error message when login fails"
   },
+  "loginEndpointNotFound": {
+    "message": "Endpoint de connexion introuvable (404). Veuillez mettre à jour votre serveur Immo-Boussole (docker compose pull) pour activer la connexion par mot de passe, ou utilisez une clé d'API.",
+    "description": "Error message when login endpoint returns 404"
+  },
   "connectionSuccess": {
     "message": "Connexion à Immo-Boussole réussie !",
     "description": "Message shown on connection test success"

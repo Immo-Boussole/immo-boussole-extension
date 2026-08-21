@@ -118,6 +118,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 handleCloudflareChallenge(cleanUrl);
                 return;
             }
+            if (resp.status === 404) {
+                statusMsg.className = 'status-msg error';
+                statusMsg.textContent = t('loginEndpointNotFound');
+                return;
+            }
             let data = null;
             try {
                 data = JSON.parse(bodyText);

@@ -137,6 +137,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
+      if (resp.status === 404) {
+        statusMsg.className = 'status-msg error';
+        statusMsg.textContent = t('loginEndpointNotFound');
+        return;
+      }
+
       let data: any = null;
       try {
         data = JSON.parse(bodyText);

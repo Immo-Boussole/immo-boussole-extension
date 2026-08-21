@@ -95,6 +95,10 @@
     "message": "Login failed: Invalid username or password.",
     "description": "Error message when login fails"
   },
+  "loginEndpointNotFound": {
+    "message": "Login endpoint not found (404). Please update your Immo-Boussole server instance (docker compose pull) to support password login, or use an API Key.",
+    "description": "Error message when login endpoint returns 404"
+  },
   "connectionSuccess": {
     "message": "Successfully connected to Immo-Boussole!",
     "description": "Message shown on connection test success"
