@@ -1,16 +1,16 @@
 import browser from 'webextension-polyfill';
 import { getStoredConfig } from '../storage';
-import { ExternalListingPayload } from '../types';
+import { ExternalListingPayload, AddListingResponse } from '../types';
 import { t } from '../i18n';
 
-browser.runtime.onMessage.addListener(async (message: any, sender: any) => {
+browser.runtime.onMessage.addListener(async (message: any, sender: any): Promise<AddListingResponse> => {
   if (message.type === 'ADD_LISTING') {
     return await handleAddListing(message.payload);
   }
   return { success: false, message: t('unknownMessageType') };
 });
 
-async function handleAddListing(payload: ExternalListingPayload) {
+async function handleAddListing(payload: ExternalListingPayload): Promise<AddListingResponse> {
   try {
     const config = await getStoredConfig();
     if (!config.serverUrl || !config.apiKey) {
@@ -72,9 +72,31 @@ async function handleAddListing(payload: ExternalListingPayload) {
       if (data.message === 'Scraping task started in background.') {
         localizedMsg = t('scrapingStarted');
       }
+
+      let listingId: number | undefined = undefined;
+      let immoBoussoleUrl: string | undefined = undefined;
+
+      if (data.data && data.data.listing_id) {
+        listingId = data.data.listing_id;
+        immoBoussoleUrl = `${cleanServerUrl}/listing/${listingId}`;
+      } else if (data.data && data.data.immo_boussole_url) {
+        immoBoussoleUrl = `${cleanServerUrl}${data.data.immo_boussole_url}`;
+      }
+
+      // Auto-open new tab if option is enabled (enabled by default)
+      if (config.openTabAfterImport !== false && immoBoussoleUrl) {
+        try {
+          browser.tabs.create({ url: immoBoussoleUrl });
+        } catch (e) {
+          console.warn('Could not auto-open listing tab:', e);
+        }
+      }
+
       return {
         success: true,
-        message: localizedMsg || t('addSuccess')
+        message: localizedMsg || t('addSuccess'),
+        listingId,
+        immoBoussoleUrl
       };
     } catch {
       return {

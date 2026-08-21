@@ -3,6 +3,7 @@ export interface ExtensionConfig {
   apiKey: string;
   username?: string;
   activeTab?: 'apikey' | 'userpass';
+  openTabAfterImport?: boolean;
 }
 
 export interface ExternalListingPayload {
@@ -24,4 +25,5 @@ export interface AddListingResponse {
   success: boolean;
   message: string;
   listingId?: number;
+  immoBoussoleUrl?: string;
 }

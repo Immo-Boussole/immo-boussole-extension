@@ -7,9 +7,16 @@ export async function getStoredConfig(): Promise<ExtensionConfig> {
   try {
     const data = await browser.storage.local.get(CONFIG_KEY);
     const cfg = data[CONFIG_KEY] as ExtensionConfig | undefined;
-    return cfg || { serverUrl: '', apiKey: '', username: '', activeTab: 'userpass' };
+    return {
+      serverUrl: '',
+      apiKey: '',
+      username: '',
+      activeTab: 'userpass',
+      openTabAfterImport: true,
+      ...cfg
+    };
   } catch {
-    return { serverUrl: '', apiKey: '', username: '', activeTab: 'userpass' };
+    return { serverUrl: '', apiKey: '', username: '', activeTab: 'userpass', openTabAfterImport: true };
   }
 }
 

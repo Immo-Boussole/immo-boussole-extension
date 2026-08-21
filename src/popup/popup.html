@@ -81,7 +81,18 @@
       <input type="url" id="manual-url" data-i18n-placeholder="manualUrlPlaceholder" placeholder="https://www.leboncoin.fr/ad/..." />
       <button type="button" id="btn-add-manual" class="btn btn-secondary" data-i18n="btnAddManual">Add</button>
     </div>
+
+    <div class="checkbox-container">
+      <label class="checkbox-label">
+        <input type="checkbox" id="open-tab-checkbox" checked />
+        <span data-i18n="openTabAfterImport">Ouvrir un nouvel onglet après l'import</span>
+      </label>
+    </div>
+
     <div id="add-status-message" class="status-msg"></div>
+    <button type="button" id="btn-view-listing" class="btn btn-secondary btn-sm btn-view-immo" style="display: none;" data-i18n="btnViewListing">
+      👁️ Voir dans Immo-Boussole
+    </button>
   </div>
 
   <script type="module" src="popup.ts"></script>

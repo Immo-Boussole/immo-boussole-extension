@@ -139,6 +139,14 @@
     "message": "Ajouter",
     "description": "Button to add manual URL"
   },
+  "openTabAfterImport": {
+    "message": "Ouvrir un nouvel onglet après l'import",
+    "description": "Checkbox to open new tab after listing import"
+  },
+  "btnViewListing": {
+    "message": "👁️ Voir dans Immo-Boussole",
+    "description": "Button to view listing in Immo-Boussole in a new tab"
+  },
   "invalidUrl": {
     "message": "Veuillez saisir une URL valide.",
     "description": "Error message for invalid URL"

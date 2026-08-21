@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const cloudflareBanner = document.getElementById('cloudflare-banner') as HTMLDivElement;
   const btnRetryCf = document.getElementById('btn-retry-cf') as HTMLButtonElement;
 
+  // New tab options
+  const openTabCheckbox = document.getElementById('open-tab-checkbox') as HTMLInputElement;
+  const btnViewListing = document.getElementById('btn-view-listing') as HTMLButtonElement;
+
   // Tabs
   const tabBtnApiKey = document.getElementById('tab-btn-apikey') as HTMLButtonElement;
   const tabBtnUserPass = document.getElementById('tab-btn-userpass') as HTMLButtonElement;
@@ -56,6 +60,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (config.serverUrl) serverUrlInput.value = config.serverUrl;
   if (config.apiKey) apiKeyInput.value = config.apiKey;
   if (config.username) usernameInput.value = config.username;
+
+  // Open tab checkbox state
+  openTabCheckbox.checked = config.openTabAfterImport !== false;
+  openTabCheckbox.addEventListener('change', () => {
+    saveStoredConfig({ openTabAfterImport: openTabCheckbox.checked });
+  });
 
   // Restore active tab
   if (config.activeTab) {
@@ -327,6 +337,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function sendUrlToBackend(url: string) {
     addStatusMsg.className = 'status-msg';
     addStatusMsg.textContent = t('sending');
+    btnViewListing.style.display = 'none';
 
     const cfg = await getStoredConfig();
     if (!cfg.serverUrl || !cfg.apiKey) {
@@ -344,6 +355,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (resp && resp.success) {
         addStatusMsg.className = 'status-msg success';
         addStatusMsg.textContent = resp.message || t('addSuccess');
+
+        if (resp.immoBoussoleUrl) {
+          btnViewListing.style.display = 'block';
+          btnViewListing.onclick = () => {
+            browser.tabs.create({ url: resp.immoBoussoleUrl });
+          };
+        }
       } else {
         addStatusMsg.className = 'status-msg error';
         addStatusMsg.textContent = resp?.message || t('addError');

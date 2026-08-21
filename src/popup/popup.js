@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const badge = document.getElementById('connection-badge');
     const cloudflareBanner = document.getElementById('cloudflare-banner');
     const btnRetryCf = document.getElementById('btn-retry-cf');
+    // New tab options
+    const openTabCheckbox = document.getElementById('open-tab-checkbox');
+    const btnViewListing = document.getElementById('btn-view-listing');
     // Tabs
     const tabBtnApiKey = document.getElementById('tab-btn-apikey');
     const tabBtnUserPass = document.getElementById('tab-btn-userpass');
@@ -51,6 +54,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         apiKeyInput.value = config.apiKey;
     if (config.username)
         usernameInput.value = config.username;
+    // Open tab checkbox state
+    openTabCheckbox.checked = config.openTabAfterImport !== false;
+    openTabCheckbox.addEventListener('change', () => {
+        saveStoredConfig({ openTabAfterImport: openTabCheckbox.checked });
+    });
     // Restore active tab
     if (config.activeTab) {
         switchTab(config.activeTab);
@@ -302,6 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function sendUrlToBackend(url) {
         addStatusMsg.className = 'status-msg';
         addStatusMsg.textContent = t('sending');
+        btnViewListing.style.display = 'none';
         const cfg = await getStoredConfig();
         if (!cfg.serverUrl || !cfg.apiKey) {
             addStatusMsg.className = 'status-msg error';
@@ -316,6 +325,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (resp && resp.success) {
                 addStatusMsg.className = 'status-msg success';
                 addStatusMsg.textContent = resp.message || t('addSuccess');
+                if (resp.immoBoussoleUrl) {
+                    btnViewListing.style.display = 'block';
+                    btnViewListing.onclick = () => {
+                        browser.tabs.create({ url: resp.immoBoussoleUrl });
+                    };
+                }
             }
             else {
                 addStatusMsg.className = 'status-msg error';

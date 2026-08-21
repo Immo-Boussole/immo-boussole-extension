@@ -61,9 +61,29 @@ async function handleAddListing(payload) {
             if (data.message === 'Scraping task started in background.') {
                 localizedMsg = t('scrapingStarted');
             }
+            let listingId = undefined;
+            let immoBoussoleUrl = undefined;
+            if (data.data && data.data.listing_id) {
+                listingId = data.data.listing_id;
+                immoBoussoleUrl = `${cleanServerUrl}/listing/${listingId}`;
+            }
+            else if (data.data && data.data.immo_boussole_url) {
+                immoBoussoleUrl = `${cleanServerUrl}${data.data.immo_boussole_url}`;
+            }
+            // Auto-open new tab if option is enabled (enabled by default)
+            if (config.openTabAfterImport !== false && immoBoussoleUrl) {
+                try {
+                    browser.tabs.create({ url: immoBoussoleUrl });
+                }
+                catch (e) {
+                    console.warn('Could not auto-open listing tab:', e);
+                }
+            }
             return {
                 success: true,
-                message: localizedMsg || t('addSuccess')
+                message: localizedMsg || t('addSuccess'),
+                listingId,
+                immoBoussoleUrl
             };
         }
         catch {
