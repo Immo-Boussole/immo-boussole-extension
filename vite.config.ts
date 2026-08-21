@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { copyFileSync, cpSync, mkdirSync, existsSync } from 'fs';
+import { copyFileSync, cpSync, mkdirSync, existsSync, readFileSync, writeFileSync } from 'fs';
 
 export default defineConfig(({ mode }) => {
   return {
@@ -32,7 +32,29 @@ export default defineConfig(({ mode }) => {
           if (!existsSync(outDir)) {
             mkdirSync(outDir, { recursive: true });
           }
-          copyFileSync(resolve(__dirname, 'src/manifest.json'), resolve(outDir, 'manifest.json'));
+
+          // Process manifest.json according to browser target
+          const manifestRaw = readFileSync(resolve(__dirname, 'src/manifest.json'), 'utf-8');
+          const manifest = JSON.parse(manifestRaw);
+
+          if (mode === 'chrome') {
+            // Chrome and Edge (Chromium MV3) require service_worker
+            manifest.background = {
+              service_worker: 'background.js',
+              type: 'module'
+            };
+            // Remove Firefox-specific gecko settings
+            delete manifest.browser_specific_settings;
+          } else if (mode === 'firefox') {
+            // Firefox MV3 uses scripts
+            manifest.background = {
+              scripts: ['background.js'],
+              type: 'module'
+            };
+          }
+
+          writeFileSync(resolve(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+
           if (existsSync(resolve(__dirname, 'src/content/content.css'))) {
             copyFileSync(resolve(__dirname, 'src/content/content.css'), resolve(outDir, 'content.css'));
           }
