@@ -25,14 +25,19 @@ browser.runtime.onMessage.addListener(async (message: any, sender: any): Promise
   return { success: false, message: t('unknownMessageType') };
 });
 
+// Clean up cache when tabs are closed
+browser.tabs.onRemoved.addListener((tabId: number) => {
+  delete tabListingStatusCache[tabId];
+});
+
 // Automatically check active tab when switched or loaded
 browser.tabs.onActivated.addListener(async (activeInfo) => {
   try {
-    const tab = await browser.tabs.get(activeInfo.tabId);
-    if (tab.url && isListingUrl(tab.url)) {
+    const tab = await browser.tabs.get(activeInfo.tabId).catch(() => null);
+    if (tab && tab.url && isListingUrl(tab.url)) {
       await handleCheckListingExists(tab.url, activeInfo.tabId);
-    } else {
-      clearBadge(activeInfo.tabId);
+    } else if (tab) {
+      await clearBadge(activeInfo.tabId);
     }
   } catch (e) {
     // ignore
@@ -40,12 +45,16 @@ browser.tabs.onActivated.addListener(async (activeInfo) => {
 });
 
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url) {
-    if (isListingUrl(tab.url)) {
-      await handleCheckListingExists(tab.url, tabId);
-    } else {
-      clearBadge(tabId);
+  try {
+    if (changeInfo.status === 'complete' && tab && tab.url) {
+      if (isListingUrl(tab.url)) {
+        await handleCheckListingExists(tab.url, tabId);
+      } else {
+        await clearBadge(tabId);
+      }
     }
+  } catch (e) {
+    // ignore
   }
 });
 
@@ -53,20 +62,20 @@ function isListingPage(url: string): boolean {
   return isListingUrl(url);
 }
 
-function setCheckBadge(tabId?: number) {
+async function setCheckBadge(tabId?: number) {
   if (!tabId) return;
   try {
-    browser.action.setBadgeText({ tabId, text: '✔' });
-    browser.action.setBadgeBackgroundColor({ tabId, color: '#10b981' });
+    await browser.action.setBadgeText({ tabId, text: '✔' }).catch(() => {});
+    await browser.action.setBadgeBackgroundColor({ tabId, color: '#10b981' }).catch(() => {});
   } catch (e) {
     // ignore
   }
 }
 
-function clearBadge(tabId?: number) {
+async function clearBadge(tabId?: number) {
   if (!tabId) return;
   try {
-    browser.action.setBadgeText({ tabId, text: '' });
+    await browser.action.setBadgeText({ tabId, text: '' }).catch(() => {});
   } catch (e) {
     // ignore
   }
@@ -102,7 +111,7 @@ async function handleCheckListingExists(url: string, tabId?: number): Promise<Ch
         };
         if (tabId) {
           tabListingStatusCache[tabId] = result;
-          setCheckBadge(tabId);
+          await setCheckBadge(tabId);
         }
         return result;
       }
@@ -110,11 +119,11 @@ async function handleCheckListingExists(url: string, tabId?: number): Promise<Ch
     
     if (tabId) {
       tabListingStatusCache[tabId] = { exists: false };
-      clearBadge(tabId);
+      await clearBadge(tabId);
     }
     return { exists: false };
   } catch (err) {
-    if (tabId) clearBadge(tabId);
+    if (tabId) await clearBadge(tabId);
     return { exists: false };
   }
 }
@@ -158,7 +167,7 @@ async function handleAddListing(payload: ExternalListingPayload, tabId?: number)
     ) {
       // Open server URL to let user complete Cloudflare validation
       try {
-        await browser.tabs.create({ url: cleanServerUrl, active: true });
+        await browser.tabs.create({ url: cleanServerUrl, active: true }).catch(() => {});
       } catch (e) {
         // ignore
       }
@@ -206,7 +215,7 @@ async function handleAddListing(payload: ExternalListingPayload, tabId?: number)
 
       // Update badge to green checkmark on success
       if (tabId) {
-        setCheckBadge(tabId);
+        await setCheckBadge(tabId);
         tabListingStatusCache[tabId] = {
           exists: true,
           listingId,
@@ -218,7 +227,7 @@ async function handleAddListing(payload: ExternalListingPayload, tabId?: number)
       // Auto-open new tab if option is enabled (default is true)
       if (config.openTabAfterImport !== false && immoBoussoleUrl && listingId) {
         try {
-          await browser.tabs.create({ url: immoBoussoleUrl, active: true });
+          await browser.tabs.create({ url: immoBoussoleUrl, active: true }).catch(() => {});
         } catch (e) {
           console.warn('Could not auto-open listing tab:', e);
         }
