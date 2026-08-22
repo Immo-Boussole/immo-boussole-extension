@@ -25,6 +25,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const cloudflareBanner = document.getElementById('cloudflare-banner') as HTMLDivElement;
   const btnRetryCf = document.getElementById('btn-retry-cf') as HTMLButtonElement;
 
+  // Collapsible configuration card
+  const configCard = document.getElementById('config-card') as HTMLDivElement;
+  const configToggleHeader = document.getElementById('config-toggle-header') as HTMLDivElement;
+
+  configToggleHeader.addEventListener('click', () => {
+    configCard.classList.toggle('collapsed');
+  });
+
   // New tab options
   const openTabCheckbox = document.getElementById('open-tab-checkbox') as HTMLInputElement;
   const btnViewListing = document.getElementById('btn-view-listing') as HTMLButtonElement;
@@ -89,8 +97,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     saveStoredConfig({ username: usernameInput.value.trim() });
   });
 
-  if (config.apiKey && config.serverUrl) {
-    checkConnection(config.serverUrl, config.apiKey);
+  // Automatically test connection and check Cloudflare on popup opening
+  if (config.serverUrl) {
+    checkConnection(config.serverUrl, config.apiKey || '');
   }
 
   // Save API Key config explicitly
@@ -102,6 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!serverUrl || !apiKey) {
       statusMsg.className = 'status-msg error';
       statusMsg.textContent = t('missingCredentials');
+      configCard.classList.remove('collapsed');
       return;
     }
 
@@ -124,6 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!serverUrl || !username || !password) {
       statusMsg.className = 'status-msg error';
       statusMsg.textContent = t('missingLoginFields');
+      configCard.classList.remove('collapsed');
       return;
     }
 
@@ -150,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (resp.status === 404) {
         statusMsg.className = 'status-msg error';
         statusMsg.textContent = t('loginEndpointNotFound');
+        configCard.classList.remove('collapsed');
         return;
       }
 
@@ -164,6 +176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           statusMsg.className = 'status-msg error';
           statusMsg.textContent = `Erreur (${resp.status}): Réponse invalide du serveur.`;
         }
+        configCard.classList.remove('collapsed');
         return;
       }
 
@@ -177,10 +190,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideCloudflareBanner();
         badge.className = 'badge badge-connected';
         badge.textContent = t('statusConnected');
+        configCard.classList.add('collapsed');
         switchTab('apikey', true);
       } else {
         statusMsg.className = 'status-msg error';
         statusMsg.textContent = (data && data.detail) ? data.detail : t('loginFailed');
+        configCard.classList.remove('collapsed');
       }
     } catch (err: any) {
       if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
@@ -188,6 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         statusMsg.className = 'status-msg error';
         statusMsg.textContent = `${t('statusOffline')}: ${err.message}`;
+        configCard.classList.remove('collapsed');
       }
     }
   });
@@ -199,6 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!serverUrl || !apiKey) {
       statusMsg.className = 'status-msg error';
       statusMsg.textContent = t('missingCredentials');
+      configCard.classList.remove('collapsed');
       return;
     }
     await checkConnection(serverUrl, apiKey, true);
@@ -213,6 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (serverUrl) {
       switchTab('userpass', true);
       statusMsg.textContent = 'Veuillez vous reconnecter.';
+      configCard.classList.remove('collapsed');
     }
   });
 
@@ -267,6 +285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function handleCloudflareChallenge(serverUrl: string) {
+    configCard.classList.remove('collapsed');
     cloudflareBanner.style.display = 'flex';
     badge.className = 'badge badge-cloudflare';
     badge.textContent = t('statusCloudflare');
@@ -275,7 +294,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Automatically open a new tab pointing to the server instance
     try {
-      browser.tabs.create({ url: serverUrl });
+      browser.tabs.create({ url: serverUrl, active: true });
     } catch (e) {
       console.warn('Could not open Cloudflare tab:', e);
     }
@@ -306,6 +325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideCloudflareBanner();
         badge.className = 'badge badge-connected';
         badge.textContent = t('statusConnected');
+        configCard.classList.add('collapsed');
         if (showMsg) {
           statusMsg.className = 'status-msg success';
           statusMsg.textContent = t('connectionSuccess');
@@ -314,6 +334,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideCloudflareBanner();
         badge.className = 'badge badge-disconnected';
         badge.textContent = t('statusAuthError');
+        configCard.classList.remove('collapsed');
         if (showMsg) {
           statusMsg.className = 'status-msg error';
           statusMsg.textContent = `Error (${resp.status}): ${t('missingCredentials')}`;
@@ -326,6 +347,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideCloudflareBanner();
         badge.className = 'badge badge-disconnected';
         badge.textContent = t('statusOffline');
+        configCard.classList.remove('collapsed');
         if (showMsg) {
           statusMsg.className = 'status-msg error';
           statusMsg.textContent = `${t('statusOffline')}: ${err.message}`;
@@ -343,6 +365,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!cfg.serverUrl || !cfg.apiKey) {
       addStatusMsg.className = 'status-msg error';
       addStatusMsg.textContent = t('notConfigured');
+      configCard.classList.remove('collapsed');
       return;
     }
 

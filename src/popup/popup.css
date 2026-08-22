@@ -75,6 +75,19 @@ body {
   border-radius: 8px;
   padding: 10px;
   margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.card-header-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-header-toggle:hover h2 {
+  color: var(--primary-color);
 }
 
 .card h2 {
@@ -84,6 +97,30 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: #6b7280;
+  transition: color 0.15s ease;
+}
+
+.card-header-toggle h2 {
+  margin-bottom: 0;
+}
+
+.toggle-icon {
+  font-size: 10px;
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+}
+
+.config-card.collapsed {
+  padding: 8px 10px;
+  background-color: #f9fafb;
+}
+
+.config-card.collapsed .config-body {
+  display: none;
+}
+
+.config-card.collapsed .toggle-icon {
+  transform: rotate(-90deg);
 }
 
 .subtitle {
