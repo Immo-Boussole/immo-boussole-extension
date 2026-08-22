@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (targetUrl) {
                     btnViewListing.style.display = 'block';
                     btnViewListing.onclick = () => {
-                        browser.tabs.create({ url: targetUrl });
+                        browser.tabs.create({ url: targetUrl, active: true });
                     };
                 }
             }

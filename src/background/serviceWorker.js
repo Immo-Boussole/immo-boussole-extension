@@ -65,15 +65,16 @@ async function handleAddListing(payload) {
             let immoBoussoleUrl = `${cleanServerUrl}/`;
             if (data.data && data.data.listing_id) {
                 listingId = data.data.listing_id;
-                immoBoussoleUrl = `${cleanServerUrl}/listing/${listingId}`;
+                immoBoussoleUrl = `${cleanServerUrl}/listings/${listingId}`;
             }
             else if (data.data && data.data.immo_boussole_url) {
-                immoBoussoleUrl = `${cleanServerUrl}${data.data.immo_boussole_url}`;
+                const path = data.data.immo_boussole_url.startsWith('/') ? data.data.immo_boussole_url : `/${data.data.immo_boussole_url}`;
+                immoBoussoleUrl = `${cleanServerUrl}${path}`;
             }
             // Auto-open new tab if option is enabled (default is true)
             if (config.openTabAfterImport !== false && immoBoussoleUrl) {
                 try {
-                    await browser.tabs.create({ url: immoBoussoleUrl });
+                    await browser.tabs.create({ url: immoBoussoleUrl, active: true });
                 }
                 catch (e) {
                     console.warn('Could not auto-open listing tab:', e);
