@@ -218,5 +218,13 @@
   "serverUnreachable": {
     "message": "Impossible de joindre Immo-Boussole.",
     "description": "Error when server is unreachable"
+  },
+  "listingAlreadyExists": {
+    "message": "Annonce déjà présente dans la base (mise à jour).",
+    "description": "Message when listing already exists in database"
+  },
+  "btnAlreadyInDb": {
+    "message": "✔ Déjà en base",
+    "description": "Button label when listing was already in database"
   }
 }

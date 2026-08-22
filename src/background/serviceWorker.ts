@@ -69,20 +69,44 @@ async function handleAddListing(payload: ExternalListingPayload): Promise<AddLis
     try {
       const data = JSON.parse(bodyText);
       let localizedMsg = data.message;
-      if (data.message === 'Scraping task started in background.') {
+      const isAlreadyExists = data.data?.already_exists || (typeof data.message === 'string' && data.message.toLowerCase().includes('déjà'));
+
+      if (isAlreadyExists) {
+        localizedMsg = t('listingAlreadyExists');
+      } else if (data.message === 'Scraping task started in background.') {
         localizedMsg = t('scrapingStarted');
       }
 
       let listingId: number | undefined = undefined;
-      let immoBoussoleUrl: string = `${cleanServerUrl}/`;
 
       if (data.data && data.data.listing_id) {
         listingId = data.data.listing_id;
-        immoBoussoleUrl = `${cleanServerUrl}/listings/${listingId}`;
-      } else if (data.data && data.data.immo_boussole_url) {
-        const path = data.data.immo_boussole_url.startsWith('/') ? data.data.immo_boussole_url : `/${data.data.immo_boussole_url}`;
-        immoBoussoleUrl = `${cleanServerUrl}${path}`;
       }
+
+      // Fallback query: if listingId not in response, query /api/v1/listings/ to retrieve matching ID or latest import
+      if (!listingId) {
+        try {
+          const listResp = await fetch(`${cleanServerUrl}/api/v1/listings/?limit=20`, {
+            headers: {
+              'Authorization': `Bearer ${config.apiKey}`
+            },
+            credentials: 'include'
+          });
+          if (listResp.ok) {
+            const listData = await listResp.json();
+            if (Array.isArray(listData) && listData.length > 0) {
+              const match = listData.find((l: any) => l.url === payload.url || l.original_url === payload.url);
+              listingId = match ? match.id : listData[0].id;
+            }
+          }
+        } catch (errFallback) {
+          console.warn('Fallback listing retrieval failed:', errFallback);
+        }
+      }
+
+      const immoBoussoleUrl: string = listingId
+        ? `${cleanServerUrl}/listings/${listingId}`
+        : `${cleanServerUrl}/`;
 
       // Auto-open new tab if option is enabled (default is true)
       if (config.openTabAfterImport !== false && immoBoussoleUrl) {
@@ -97,7 +121,8 @@ async function handleAddListing(payload: ExternalListingPayload): Promise<AddLis
         success: true,
         message: localizedMsg || t('addSuccess'),
         listingId,
-        immoBoussoleUrl
+        immoBoussoleUrl,
+        alreadyExists: isAlreadyExists
       };
     } catch {
       return {

@@ -26,4 +26,5 @@ export interface AddListingResponse {
   message: string;
   listingId?: number;
   immoBoussoleUrl?: string;
+  alreadyExists?: boolean;
 }

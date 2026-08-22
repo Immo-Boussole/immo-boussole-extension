@@ -14,9 +14,10 @@ async function sendListingToExtension(payload, btn) {
         });
         if (response && response.success) {
             btn.className = btn.className.replace('loading', '') + ' success';
-            btn.innerHTML = `${t('btnViewListing')} ↗`;
+            const label = response.alreadyExists ? t('btnAlreadyInDb') : t('btnViewListing');
+            btn.innerHTML = `${label} ↗`;
             btn.disabled = false;
-            btn.title = t('btnViewListing');
+            btn.title = response.message || label;
             if (response.immoBoussoleUrl) {
                 btn.onclick = (e) => {
                     e.preventDefault();
