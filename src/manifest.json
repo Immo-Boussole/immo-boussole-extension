@@ -17,6 +17,10 @@
   "host_permissions": [
     "https://*.leboncoin.fr/*",
     "https://*.lefigaro.fr/*",
+    "https://*.seloger.com/*",
+    "https://*.bienici.com/*",
+    "https://*.pap.fr/*",
+    "https://*.logic-immo.com/*",
     "https://*/*",
     "http://*/*"
   ],
@@ -39,7 +43,8 @@
       "matches": [
         "https://*.leboncoin.fr/*",
         "https://*.immobilier.lefigaro.fr/*",
-        "https://immobilier.lefigaro.fr/*"
+        "https://immobilier.lefigaro.fr/*",
+        "https://*.seloger.com/*"
       ],
       "js": ["content.js"],
       "css": ["content.css"],

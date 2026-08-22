@@ -3,6 +3,7 @@ import { ExternalListingPayload, AddListingResponse, CheckListingResponse } from
 import { t } from '../i18n';
 import { isLeboncoin, injectLeboncoinButtons } from './scrapers/leboncoin';
 import { isFigaro, injectFigaroButtons } from './scrapers/figaro';
+import { isSeloger, injectSelogerButtons } from './scrapers/seloger';
 
 function showToastNotification(message: string, isSuccess: boolean) {
   const existing = document.getElementById('immo-boussole-toast-el');
@@ -111,6 +112,8 @@ function runInjections() {
     injectLeboncoinButtons(sendListingToExtension);
   } else if (isFigaro()) {
     injectFigaroButtons(sendListingToExtension);
+  } else if (isSeloger()) {
+    injectSelogerButtons(sendListingToExtension);
   }
   checkCurrentPageListing();
 }

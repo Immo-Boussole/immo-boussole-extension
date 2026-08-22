@@ -2,6 +2,7 @@ import browser from 'webextension-polyfill';
 import { t } from '../i18n';
 import { isLeboncoin, injectLeboncoinButtons } from './scrapers/leboncoin';
 import { isFigaro, injectFigaroButtons } from './scrapers/figaro';
+import { isSeloger, injectSelogerButtons } from './scrapers/seloger';
 function showToastNotification(message, isSuccess) {
     const existing = document.getElementById('immo-boussole-toast-el');
     if (existing)
@@ -103,6 +104,9 @@ function runInjections() {
     }
     else if (isFigaro()) {
         injectFigaroButtons(sendListingToExtension);
+    }
+    else if (isSeloger()) {
+        injectSelogerButtons(sendListingToExtension);
     }
     checkCurrentPageListing();
 }
