@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill';
 import { getStoredConfig } from '../storage';
+import { isListingUrl } from '../types';
 import { t } from '../i18n';
 // Cache of listing check statuses by tabId
 const tabListingStatusCache = {};
@@ -25,7 +26,7 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
 browser.tabs.onActivated.addListener(async (activeInfo) => {
     try {
         const tab = await browser.tabs.get(activeInfo.tabId);
-        if (tab.url && isListingPage(tab.url)) {
+        if (tab.url && isListingUrl(tab.url)) {
             await handleCheckListingExists(tab.url, activeInfo.tabId);
         }
         else {
@@ -38,7 +39,7 @@ browser.tabs.onActivated.addListener(async (activeInfo) => {
 });
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete' && tab.url) {
-        if (isListingPage(tab.url)) {
+        if (isListingUrl(tab.url)) {
             await handleCheckListingExists(tab.url, tabId);
         }
         else {
@@ -47,7 +48,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
 });
 function isListingPage(url) {
-    return url.includes('leboncoin.fr/ad/') || url.includes('immobilier.lefigaro.fr/annonces/');
+    return isListingUrl(url);
 }
 function setCheckBadge(tabId) {
     if (!tabId)

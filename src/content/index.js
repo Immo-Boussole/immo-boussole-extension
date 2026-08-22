@@ -1,4 +1,5 @@
 import browser from 'webextension-polyfill';
+import { isListingUrl } from '../types';
 import { t } from '../i18n';
 import { isLeboncoin, injectLeboncoinButtons } from './scrapers/leboncoin';
 import { isFigaro, injectFigaroButtons } from './scrapers/figaro';
@@ -73,7 +74,7 @@ async function sendListingToExtension(payload, btn) {
 // Check current page listing existence and update button if already saved
 async function checkCurrentPageListing() {
     const href = window.location.href;
-    if (!href.includes('/ad/') && !href.includes('/annonces/'))
+    if (!isListingUrl(href))
         return;
     try {
         const check = await browser.runtime.sendMessage({

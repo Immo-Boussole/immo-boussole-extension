@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill';
 import { getStoredConfig, saveStoredConfig } from '../storage';
+import { isListingUrl } from '../types';
 import { t, localizeDocument } from '../i18n';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -121,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     if (tabs[0] && tabs[0].url) {
       const tabUrl = tabs[0].url;
-      if (tabUrl.includes('/ad/') || tabUrl.includes('/annonces/')) {
+      if (isListingUrl(tabUrl)) {
         const check = await browser.runtime.sendMessage({
           type: 'CHECK_LISTING_EXISTS',
           url: tabUrl
