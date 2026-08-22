@@ -6,6 +6,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Localize static UI elements
   localizeDocument();
 
+  // Display manifest extension version
+  try {
+    const manifest = browser.runtime.getManifest();
+    const versionEl = document.getElementById('ext-version');
+    if (versionEl && manifest && manifest.version) {
+      versionEl.textContent = `v${manifest.version}`;
+    }
+  } catch (e) {
+    // ignore
+  }
+
   const serverUrlInput = document.getElementById('server-url') as HTMLInputElement;
   const apiKeyInput = document.getElementById('api-key') as HTMLInputElement;
   const usernameInput = document.getElementById('username') as HTMLInputElement;

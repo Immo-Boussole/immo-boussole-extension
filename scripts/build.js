@@ -79,6 +79,24 @@ async function buildAll() {
   const manifestRaw = readFileSync(resolve(rootDir, 'src/manifest.json'), 'utf-8');
   const manifest = JSON.parse(manifestRaw);
 
+  // Dynamic version injection from ENV / CI / package.json
+  let version = process.env.EXTENSION_VERSION;
+  if (!version && process.env.GITHUB_REF_TYPE === 'tag' && process.env.GITHUB_REF_NAME) {
+    version = process.env.GITHUB_REF_NAME.replace(/^v/, '');
+  } else if (!version && process.env.GITHUB_RUN_NUMBER) {
+    const pkg = JSON.parse(readFileSync(resolve(rootDir, 'package.json'), 'utf-8'));
+    const baseVer = pkg.version ? pkg.version.split('.').slice(0, 2).join('.') : '1.0';
+    version = `${baseVer}.${process.env.GITHUB_RUN_NUMBER}`;
+  } else if (!version) {
+    const pkg = JSON.parse(readFileSync(resolve(rootDir, 'package.json'), 'utf-8'));
+    version = pkg.version || '1.0.0';
+  }
+
+  // Format valid manifest version (integers separated by dots)
+  version = version.replace(/[^0-9.]/g, '') || '1.0.0';
+  manifest.version = version;
+  console.log(`Injecting extension version: ${version}`);
+
   if (target === 'chrome') {
     manifest.background = {
       service_worker: 'background.js'
@@ -106,7 +124,7 @@ async function buildAll() {
     cpSync(iconsDir, resolve(outDir, 'icons'), { recursive: true });
   }
 
-  console.log(`Build for ${target} completed successfully in ${outDir}!`);
+  console.log(`Build for ${target} completed successfully with version ${version} in ${outDir}!`);
 }
 
 buildAll().catch((err) => {
