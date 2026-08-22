@@ -28,3 +28,10 @@ export interface AddListingResponse {
   immoBoussoleUrl?: string;
   alreadyExists?: boolean;
 }
+
+export interface CheckListingResponse {
+  exists: boolean;
+  listingId?: number;
+  immoBoussoleUrl?: string;
+  title?: string;
+}

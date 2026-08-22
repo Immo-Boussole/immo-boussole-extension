@@ -1,13 +1,120 @@
 import browser from 'webextension-polyfill';
 import { getStoredConfig } from '../storage';
 import { t } from '../i18n';
+// Cache of listing check statuses by tabId
+const tabListingStatusCache = {};
 browser.runtime.onMessage.addListener(async (message, sender) => {
+    if (message.type === 'CHECK_LISTING_EXISTS') {
+        const tabId = sender?.tab?.id;
+        return await handleCheckListingExists(message.url, tabId);
+    }
+    if (message.type === 'GET_TAB_LISTING_STATUS') {
+        const tabId = message.tabId;
+        if (tabId && tabListingStatusCache[tabId]) {
+            return tabListingStatusCache[tabId];
+        }
+        return { exists: false };
+    }
     if (message.type === 'ADD_LISTING') {
-        return await handleAddListing(message.payload);
+        const tabId = sender?.tab?.id;
+        return await handleAddListing(message.payload, tabId);
     }
     return { success: false, message: t('unknownMessageType') };
 });
-async function handleAddListing(payload) {
+// Automatically check active tab when switched or loaded
+browser.tabs.onActivated.addListener(async (activeInfo) => {
+    try {
+        const tab = await browser.tabs.get(activeInfo.tabId);
+        if (tab.url && isListingPage(tab.url)) {
+            await handleCheckListingExists(tab.url, activeInfo.tabId);
+        }
+        else {
+            clearBadge(activeInfo.tabId);
+        }
+    }
+    catch (e) {
+        // ignore
+    }
+});
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && tab.url) {
+        if (isListingPage(tab.url)) {
+            await handleCheckListingExists(tab.url, tabId);
+        }
+        else {
+            clearBadge(tabId);
+        }
+    }
+});
+function isListingPage(url) {
+    return url.includes('leboncoin.fr/ad/') || url.includes('immobilier.lefigaro.fr/annonces/');
+}
+function setCheckBadge(tabId) {
+    if (!tabId)
+        return;
+    try {
+        browser.action.setBadgeText({ tabId, text: '✔' });
+        browser.action.setBadgeBackgroundColor({ tabId, color: '#10b981' });
+    }
+    catch (e) {
+        // ignore
+    }
+}
+function clearBadge(tabId) {
+    if (!tabId)
+        return;
+    try {
+        browser.action.setBadgeText({ tabId, text: '' });
+    }
+    catch (e) {
+        // ignore
+    }
+}
+async function handleCheckListingExists(url, tabId) {
+    try {
+        const config = await getStoredConfig();
+        if (!config.serverUrl || !config.apiKey) {
+            return { exists: false };
+        }
+        const cleanServerUrl = config.serverUrl.replace(/\/+$/, '');
+        const checkEndpoint = `${cleanServerUrl}/api/v1/actions/check-listing?url=${encodeURIComponent(url)}`;
+        const response = await fetch(checkEndpoint, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${config.apiKey}`
+            }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data && data.exists) {
+                const fullUrl = `${cleanServerUrl}${data.immo_boussole_url || (`/listings/${data.listing_id}`)}`;
+                const result = {
+                    exists: true,
+                    listingId: data.listing_id,
+                    immoBoussoleUrl: fullUrl,
+                    title: data.title
+                };
+                if (tabId) {
+                    tabListingStatusCache[tabId] = result;
+                    setCheckBadge(tabId);
+                }
+                return result;
+            }
+        }
+        if (tabId) {
+            tabListingStatusCache[tabId] = { exists: false };
+            clearBadge(tabId);
+        }
+        return { exists: false };
+    }
+    catch (err) {
+        if (tabId)
+            clearBadge(tabId);
+        return { exists: false };
+    }
+}
+async function handleAddListing(payload, tabId) {
     try {
         const config = await getStoredConfig();
         if (!config.serverUrl || !config.apiKey) {
@@ -39,7 +146,7 @@ async function handleAddListing(payload) {
             bodyText.includes('cf-chl')) {
             // Open server URL to let user complete Cloudflare validation
             try {
-                await browser.tabs.create({ url: cleanServerUrl });
+                await browser.tabs.create({ url: cleanServerUrl, active: true });
             }
             catch (e) {
                 // ignore
@@ -69,32 +176,28 @@ async function handleAddListing(payload) {
             if (data.data && data.data.listing_id) {
                 listingId = data.data.listing_id;
             }
-            // Fallback query: if listingId not in response, query /api/v1/listings/ to retrieve matching ID or latest import
+            // If not present in response, check via check-listing endpoint
             if (!listingId) {
-                try {
-                    const listResp = await fetch(`${cleanServerUrl}/api/v1/listings/?limit=20`, {
-                        headers: {
-                            'Authorization': `Bearer ${config.apiKey}`
-                        },
-                        credentials: 'include'
-                    });
-                    if (listResp.ok) {
-                        const listData = await listResp.json();
-                        if (Array.isArray(listData) && listData.length > 0) {
-                            const match = listData.find((l) => l.url === payload.url || l.original_url === payload.url);
-                            listingId = match ? match.id : listData[0].id;
-                        }
-                    }
-                }
-                catch (errFallback) {
-                    console.warn('Fallback listing retrieval failed:', errFallback);
+                const checkRes = await handleCheckListingExists(payload.url, tabId);
+                if (checkRes.exists && checkRes.listingId) {
+                    listingId = checkRes.listingId;
                 }
             }
             const immoBoussoleUrl = listingId
                 ? `${cleanServerUrl}/listings/${listingId}`
                 : `${cleanServerUrl}/`;
+            // Update badge to green checkmark on success
+            if (tabId) {
+                setCheckBadge(tabId);
+                tabListingStatusCache[tabId] = {
+                    exists: true,
+                    listingId,
+                    immoBoussoleUrl,
+                    title: payload.title
+                };
+            }
             // Auto-open new tab if option is enabled (default is true)
-            if (config.openTabAfterImport !== false && immoBoussoleUrl) {
+            if (config.openTabAfterImport !== false && immoBoussoleUrl && listingId) {
                 try {
                     await browser.tabs.create({ url: immoBoussoleUrl, active: true });
                 }

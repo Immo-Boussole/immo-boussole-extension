@@ -226,5 +226,21 @@
   "btnAlreadyInDb": {
     "message": "✔ Already in DB",
     "description": "Button label when listing was already in database"
+  },
+  "toastImportSuccess": {
+    "message": "Listing successfully imported to Immo-Boussole!",
+    "description": "Toast message on import success"
+  },
+  "toastImportError": {
+    "message": "Error importing listing",
+    "description": "Toast message on import error"
+  },
+  "activeTabAlreadyImported": {
+    "message": "This listing is already saved in Immo-Boussole.",
+    "description": "Message shown when active tab listing is already in database"
+  },
+  "btnOpenInImmoBoussole": {
+    "message": "👁️ Open in Immo-Boussole ↗",
+    "description": "Button to open existing listing in Immo-Boussole"
   }
 }

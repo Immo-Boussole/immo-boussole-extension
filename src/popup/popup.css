@@ -134,6 +134,30 @@ body {
   transform: rotate(-90deg);
 }
 
+.card-already-saved {
+  background-color: #ecfdf5;
+  border: 1px solid #10b981;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+.saved-icon {
+  font-size: 22px;
+}
+
+.saved-info {
+  flex: 1;
+}
+
+.saved-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #065f46;
+  margin-bottom: 6px;
+}
+
 .subtitle {
   font-size: 12px;
   color: #4b5563;

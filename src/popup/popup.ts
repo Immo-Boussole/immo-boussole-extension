@@ -113,6 +113,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkConnection(config.serverUrl, config.apiKey || '');
   }
 
+  // Check if current tab is a listing already saved in Immo-Boussole
+  const alreadySavedCard = document.getElementById('already-saved-card') as HTMLDivElement;
+  const btnOpenExistingTab = document.getElementById('btn-open-existing-tab') as HTMLButtonElement;
+
+  try {
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+    if (tabs[0] && tabs[0].url) {
+      const tabUrl = tabs[0].url;
+      if (tabUrl.includes('/ad/') || tabUrl.includes('/annonces/')) {
+        const check = await browser.runtime.sendMessage({
+          type: 'CHECK_LISTING_EXISTS',
+          url: tabUrl
+        });
+        if (check && check.exists && check.immoBoussoleUrl) {
+          if (alreadySavedCard) alreadySavedCard.style.display = 'flex';
+          if (btnOpenExistingTab) {
+            btnOpenExistingTab.onclick = () => {
+              browser.tabs.create({ url: check.immoBoussoleUrl, active: true });
+            };
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+
   // Save API Key config explicitly
   apikeyForm.addEventListener('submit', async (e) => {
     e.preventDefault();
