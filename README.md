@@ -91,7 +91,16 @@ Want to add your language? See [TRANSLATING.md](TRANSLATING.md) for a quick step
 
 ---
 
-## 🔐 Security
+## 🔐 Security & Privacy
 
-The extension interacts exclusively with your designated Immo-Boussole server instance via authenticated REST API tokens.
+- **Direct Communication**: The extension interacts exclusively with your designated Immo-Boussole server instance via authenticated REST API tokens.
+- **Zero Tracking**: No telemetry, no analytics, no third-party data collection.
+- **[Privacy Policy](PRIVACY.md)**
+- **[Terms of Service](TERMS.md)**
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
 

@@ -91,6 +91,15 @@ Vous souhaitez traduire l'extension dans une autre langue ? Consultez [TRANSLATI
 
 ---
 
-## 🔐 Sécurité
+## 🔐 Sécurité & Confidentialité
 
-L'extension communique exclusivement avec votre instance privée Immo-Boussole via des requêtes API REST authentifiées par jeton d'accès sécurisé.
+- **Communication Directe** : L'extension communique exclusivement avec votre instance privée Immo-Boussole via des requêtes API REST authentifiées par jeton d'accès sécurisé.
+- **Zéro Pistage** : Aucune télémétrie, aucun traceur, aucune collecte de données personnelles.
+- **[Politique de Confidentialité](PRIVACY.fr.md)**
+- **[Conditions Générales d'Utilisation](TERMS.fr.md)**
+
+---
+
+## 📄 Licence
+
+Ce projet est distribué sous licence [MIT](LICENSE).
