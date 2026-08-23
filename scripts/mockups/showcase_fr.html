@@ -108,12 +108,11 @@
     .ext-icon-btn {
       position: relative;
       background: #334155;
-      padding: 6px;
+      padding: 4px;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
       border: 1px solid #475569;
     }
     .ext-badge {
@@ -193,7 +192,7 @@
     .injected-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: #ffffff;
       padding: 10px 20px;
@@ -202,6 +201,10 @@
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
       border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .injected-btn img {
+      width: 18px;
+      height: 18px;
     }
     
     .listing-body {
@@ -291,7 +294,7 @@
     .popup-brand {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       font-size: 15px;
       font-weight: 700;
     }
@@ -412,7 +415,7 @@
       </div>
       <div class="extension-icons">
         <div class="ext-icon-btn">
-          <img src="../../icons/icon32.png" width="20" height="20" alt="Logo" />
+          <img src="__ICON_32__" width="22" height="22" alt="Immo-Boussole Logo" />
           <span class="ext-badge">✔</span>
         </div>
       </div>
@@ -442,7 +445,8 @@
       <!-- Injected Button -->
       <div class="injected-action-bar">
         <div class="injected-btn">
-          🧭 Ajouter à Immo-Boussole
+          <img src="__ICON_32__" alt="Logo" />
+          <span>Ajouter à Immo-Boussole</span>
         </div>
       </div>
 
@@ -485,7 +489,7 @@
     <div class="popup-overlay">
       <div class="popup-header">
         <div class="popup-brand">
-          <img src="../../icons/icon32.png" width="22" height="22" alt="Logo" />
+          <img src="__ICON_32__" width="22" height="22" alt="Logo" />
           <span>Immo-Boussole</span>
           <span class="popup-version">v1.0.0</span>
         </div>
