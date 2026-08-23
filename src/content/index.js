@@ -1,9 +1,30 @@
 import browser from 'webextension-polyfill';
 import { isListingUrl } from '../types';
 import { t } from '../i18n';
-import { isLeboncoin, injectLeboncoinButtons } from './scrapers/leboncoin';
-import { isFigaro, injectFigaroButtons } from './scrapers/figaro';
-import { isSeloger, injectSelogerButtons } from './scrapers/seloger';
+import { isLeboncoin, injectLeboncoinButtons, extractLeboncoinDetailPage } from './scrapers/leboncoin';
+import { isFigaro, injectFigaroButtons, extractFigaroDetailPage } from './scrapers/figaro';
+import { isSeloger, injectSelogerButtons, extractSelogerDetailPageAsync } from './scrapers/seloger';
+// Listen for direct extraction requests (e.g. from popup "Add Current Tab")
+browser.runtime.onMessage.addListener(async (message) => {
+    if (message.type === 'EXTRACT_LISTING') {
+        try {
+            if (isSeloger()) {
+                return await extractSelogerDetailPageAsync();
+            }
+            if (isLeboncoin()) {
+                return extractLeboncoinDetailPage();
+            }
+            if (isFigaro()) {
+                return extractFigaroDetailPage();
+            }
+            return { url: window.location.href };
+        }
+        catch (e) {
+            console.warn('[Immo-Boussole] Content script extraction error:', e);
+            return { url: window.location.href };
+        }
+    }
+});
 function showToastNotification(message, isSuccess) {
     const existing = document.getElementById('immo-boussole-toast-el');
     if (existing)

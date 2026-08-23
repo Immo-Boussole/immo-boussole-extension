@@ -8,16 +8,25 @@ export interface ExtensionConfig {
 
 export interface ExternalListingPayload {
   url: string;
+  external_id?: string;
   title?: string;
   price?: number;
   area?: number;
+  land_area?: number;
   rooms?: number;
   bedrooms?: number;
+  bathroom_count?: number;
   city?: string;
   postal_code?: string;
   location?: string;
   description?: string;
+  property_type?: string;
+  dpe_rating?: string;
+  ges_rating?: string;
+  land_tax?: number;
+  charges?: number;
   photos?: string[];
+  floorplans?: string[];
   source?: string;
 }
 

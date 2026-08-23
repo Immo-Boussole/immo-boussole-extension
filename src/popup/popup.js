@@ -250,12 +250,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             configCard.classList.remove('collapsed');
         }
     });
-    // Add current tab
+    // Add current tab with rich DOM pre-extraction
     btnAddCurrent.addEventListener('click', async () => {
         try {
             const tabs = await browser.tabs.query({ active: true, currentWindow: true });
             if (tabs[0] && tabs[0].url) {
-                await sendUrlToBackend(tabs[0].url);
+                let payload = { url: tabs[0].url };
+                if (tabs[0].id) {
+                    try {
+                        // Attempt to get rich extracted payload from content script
+                        const extracted = await Promise.race([
+                            browser.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_LISTING' }),
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+                        ]);
+                        if (extracted && typeof extracted === 'object' && extracted.url) {
+                            payload = extracted;
+                        }
+                    }
+                    catch (e) {
+                        // Content script not ready or timeout, fallback to basic URL payload
+                    }
+                }
+                await sendPayloadToBackend(payload);
             }
             else {
                 addStatusMsg.className = 'status-msg error';
@@ -275,7 +291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             addStatusMsg.textContent = t('invalidUrl');
             return;
         }
-        await sendUrlToBackend(url);
+        await sendPayloadToBackend({ url });
     });
     function isCloudflareResponse(resp, text) {
         if (resp.redirected && (resp.url.includes('cloudflareaccess.com') || resp.url.includes('cloudflare.com'))) {
@@ -366,7 +382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     }
-    async function sendUrlToBackend(url) {
+    async function sendPayloadToBackend(payload) {
         addStatusMsg.className = 'status-msg';
         addStatusMsg.textContent = t('sending');
         btnViewListing.style.display = 'none';
@@ -380,7 +396,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const resp = await browser.runtime.sendMessage({
                 type: 'ADD_LISTING',
-                payload: { url }
+                payload
             });
             if (resp && resp.success) {
                 addStatusMsg.className = 'status-msg success';
