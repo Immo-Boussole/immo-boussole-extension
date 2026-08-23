@@ -31,34 +31,39 @@ async function run() {
   
   const browser = await puppeteer.launch({
     executablePath,
-    headless: true,
-    defaultViewport: {
-      width: 1280,
-      height: 800,
-      deviceScaleFactor: 1
-    }
+    headless: true
   });
 
   const page = await browser.newPage();
 
   const targets = [
-    { html: 'scripts/mockups/showcase.html', out: 'assets/screenshot-1-showcase.png' },
-    { html: 'scripts/mockups/popup_detail.html', out: 'assets/screenshot-2-popup.png' },
-    { html: 'scripts/mockups/showcase_fr.html', out: 'assets/screenshot-1-showcase-fr.png' },
-    { html: 'scripts/mockups/popup_detail_fr.html', out: 'assets/screenshot-2-popup-fr.png' },
+    // Standard Screenshots (1280x800)
+    { html: 'scripts/mockups/showcase.html', out: 'assets/screenshot-1-showcase.png', width: 1280, height: 800 },
+    { html: 'scripts/mockups/popup_detail.html', out: 'assets/screenshot-2-popup.png', width: 1280, height: 800 },
+    { html: 'scripts/mockups/showcase_fr.html', out: 'assets/screenshot-1-showcase-fr.png', width: 1280, height: 800 },
+    { html: 'scripts/mockups/popup_detail_fr.html', out: 'assets/screenshot-2-popup-fr.png', width: 1280, height: 800 },
+
+    // Promo Tiles (440x280)
+    { html: 'scripts/mockups/promo_small.html', out: 'assets/promo-small-440x280.png', width: 440, height: 280 },
+    { html: 'scripts/mockups/promo_small_fr.html', out: 'assets/promo-small-440x280-fr.png', width: 440, height: 280 },
+
+    // Marquee Promo Banners (1400x560)
+    { html: 'scripts/mockups/promo_marquee.html', out: 'assets/promo-marquee-1400x560.png', width: 1400, height: 560 },
+    { html: 'scripts/mockups/promo_marquee_fr.html', out: 'assets/promo-marquee-1400x560-fr.png', width: 1400, height: 560 }
   ];
 
   for (const target of targets) {
     const fullHtmlPath = 'file:///' + resolve(rootDir, target.html).replace(/\\/g, '/');
     const fullOutPath = resolve(rootDir, target.out);
-    console.log(`Rendering ${target.html} -> ${target.out}...`);
+    console.log(`Rendering ${target.html} (${target.width}x${target.height}) -> ${target.out}...`);
+    await page.setViewport({ width: target.width, height: target.height, deviceScaleFactor: 1 });
     await page.goto(fullHtmlPath, { waitUntil: 'networkidle0' });
-    await page.screenshot({ path: fullOutPath, clip: { x: 0, y: 0, width: 1280, height: 800 } });
+    await page.screenshot({ path: fullOutPath, clip: { x: 0, y: 0, width: target.width, height: target.height } });
     console.log(`✓ Generated: ${target.out}`);
   }
 
   await browser.close();
-  console.log('All screenshots generated successfully!');
+  console.log('All screenshots and promo assets generated successfully!');
 }
 
 run().catch((err) => {

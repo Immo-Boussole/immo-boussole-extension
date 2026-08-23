@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1400, height=560">
+  <title>Immo-Boussole Image Promotionnelle Supérieure (Français)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    body {
+      width: 1400px;
+      height: 560px;
+      overflow: hidden;
+      background: radial-gradient(circle at 75% 25%, #1e3a8a, #0f172a 65%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 80px;
+      position: relative;
+    }
+    
+    /* Background grid accent */
+    .bg-accent {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+    
+    /* Left Brand Column */
+    .left-col {
+      width: 650px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 2;
+    }
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      color: #60a5fa;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      width: fit-content;
+    }
+    .hero-title {
+      font-size: 46px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.15;
+      letter-spacing: -1px;
+    }
+    .hero-subtitle {
+      font-size: 18px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .features-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .feat-card {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(8px);
+    }
+    .feat-icon {
+      font-size: 20px;
+    }
+    .feat-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    
+    /* Right Preview Mockup */
+    .right-col {
+      width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 2;
+    }
+    .mock-popup {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      overflow: hidden;
+    }
+    .mock-header {
+      background: #0f172a;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+    }
+    .mock-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .mock-badge {
+      background: #065f46;
+      color: #34d399;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .mock-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #34d399;
+      border-radius: 50%;
+    }
+    .mock-body {
+      padding: 18px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .mock-btn {
+      background: #2563eb;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    }
+    .mock-server-box {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-accent"></div>
+  
+  <div class="left-col">
+    <div class="brand-tag">
+      <img src="../../icons/icon16.png" alt="Logo" width="16" height="16" />
+      <span>Extension Officielle Compagnon</span>
+    </div>
+    
+    <h1 class="hero-title">Immo-Boussole<br/><span style="color: #60a5fa;">Synchronisation Directe</span></h1>
+    <p class="hero-subtitle">Capturez vos annonces immobilières en 1 clic depuis les grands portails vers votre instance privée avec alerte doublons en temps réel.</p>
+    
+    <div class="features-row">
+      <div class="feat-card">
+        <span class="feat-icon">⚡</span>
+        <span class="feat-label">Import 1-Clic</span>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">✔</span>
+        <span class="feat-label">Alerte Doublons</span>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🔒</span>
+        <span class="feat-label">API REST Privée</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="right-col">
+    <div class="mock-popup">
+      <div class="mock-header">
+        <div class="mock-brand">
+          <img src="../../icons/icon32.png" width="20" height="20" alt="Logo" />
+          <span>Immo-Boussole</span>
+        </div>
+        <span class="mock-badge">Connecté</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-server-box">
+          <span>🌐 https://immo.exemple.fr</span>
+          <span style="color: #10b981; font-weight: bold;">● Actif</span>
+        </div>
+        <div class="mock-btn">
+          <span>➕</span>
+          <span>Ajouter l'onglet actif</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
