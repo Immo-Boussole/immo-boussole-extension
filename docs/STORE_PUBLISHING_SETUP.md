@@ -45,18 +45,33 @@ Dans votre dépôt GitHub (`immo-boussole-extension`), rendez-vous dans :
    - Notez le `Client ID` et le `Client Secret`.
    - Enregistrez `CHROME_CLIENT_ID` et `CHROME_CLIENT_SECRET` dans GitHub Secrets.
 
-### Étape 3 : Générer le Refresh Token OAuth 2.0
-1. Ouvrez l'URL suivante dans votre navigateur (en remplaçant `<YOUR_CLIENT_ID>` par votre Client ID) :
-   ```text
-   https://accounts.google.com/o/oauth2/auth?response_type=code&scope=https://www.googleapis.com/auth/chromewebstore&client_id=<YOUR_CLIENT_ID>&redirect_uri=urn:ietf:wg:oauth:2.0:oob
-   ```
-   *(Ou utilisez l'outil officiel en ligne de commande : `npx chrome-webstore-upload-cli rc`)*
-2. Autorisez l'accès et copiez le code d'autorisation affiché.
-3. Échangez ce code contre un refresh token via une requête HTTP POST ou avec la CLI :
-   ```bash
-   curl -X POST -d "client_id=<CLIENT_ID>&client_secret=<CLIENT_SECRET>&code=<AUTHORIZATION_CODE>&grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob" https://oauth2.googleapis.com/token
-   ```
-4. Récupérez la valeur `"refresh_token"` et enregistrez-la dans le secret GitHub `CHROME_REFRESH_TOKEN`.
+### Étape 3 : Générer le Refresh Token OAuth 2.0 (Méthode moderne)
+
+#### Option 1 (Recommandée & Automatisée en 10 secondes) :
+Ouvrez votre terminal et lancez la commande officielle :
+```bash
+npx chrome-webstore-upload-cli rc
+```
+1. L'outil vous demandera votre `Client ID` et votre `Client Secret`.
+2. Il ouvrira automatiquement votre navigateur sur la page d'authentification Google.
+3. Cliquez sur **Autoriser**.
+4. Le terminal affichera directement votre **`refresh_token`** !
+5. Copiez-le dans le secret GitHub `CHROME_REFRESH_TOKEN`.
+
+---
+
+#### Option 2 (Via Google OAuth 2.0 Playground) :
+1. Dans Google Cloud Console > Identifiants, éditez votre Client OAuth et ajoutez cette URI de redirection autorisée :
+   `https://developers.google.com/oauthplayground`
+2. Rendez-vous sur [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground).
+3. Cliquez sur l'icône d'engrenage ⚙️ en haut à droite (*OAuth 2.0 configuration*) :
+   - Cochez **Use your own OAuth credentials**.
+   - Collez votre **OAuth Client ID** et **OAuth Client secret**.
+4. Dans l'étape 1 à gauche (*Select & authorize APIs*), dans le champ *Input your own scopes* en bas, collez :
+   `https://www.googleapis.com/auth/chromewebstore`
+5. Cliquez sur **Authorize APIs** et autorisez l'accès avec votre compte Google.
+6. Dans l'étape 2 (*Exchange authorization code for tokens*), cliquez sur **Exchange authorization code for tokens**.
+7. Copiez la valeur du champ **Refresh token** et enregistrez-la dans GitHub Secrets sous le nom `CHROME_REFRESH_TOKEN`.
 
 ---
 
