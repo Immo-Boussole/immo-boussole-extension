@@ -32,12 +32,16 @@ Dans votre dépôt GitHub (`immo-boussole-extension`), rendez-vous dans :
 3. Effectuez un premier téléversement manuel du fichier `immo-boussole-chrome-edge.zip` pour initialiser l'extension et obtenir son **Extension ID** (ex: `abcdefghijklmnopqrstuvwxyz123456`).
 4. Enregistrez `CHROME_EXTENSION_ID` dans vos secrets GitHub.
 
-### Étape 2 : Activer l'API Chrome Web Store sur Google Cloud
+### Étape 2 : Activer l'API & Configurer l'écran de consentement sur Google Cloud
 1. Rendez-vous sur la [Google Cloud Console](https://console.cloud.google.com/).
-2. Créez un nouveau projet (ex: `Immo-Boussole-Extension`).
+2. Créez un nouveau projet (ex: `Immo-Boussole-Extension-publishing`).
 3. Dans la barre de recherche, cherchez **Chrome Web Store API** et cliquez sur **Activer** (*Enable*).
-4. Rendez-vous dans **Identifiants** (*Credentials*) > **Créer des identifiants** > **ID client OAuth 2.0** :
-   - Type d'application : **Application de bureau** (*Desktop App*) ou *Web App*.
+4. Rendez-vous dans **API et services** > **Écran de consentement OAuth** (*OAuth consent screen*) :
+   - Type d'utilisateur : **Externe** (*External*).
+   - Renseignez le nom de l'application et votre adresse email.
+   - **Important** : Dans l'onglet **Utilisateurs test** (*Test users*), cliquez sur **+ ADD USERS** et ajoutez votre adresse email Google (`jmarc.alb@gmail.com`) pour autoriser la génération du jeton.
+5. Rendez-vous dans **Identifiants** (*Credentials*) > **Créer des identifiants** > **ID client OAuth 2.0** :
+   - Type d'application : **Application de bureau** (*Desktop App*) ou *Application Web* (avec redirect URI `urn:ietf:wg:oauth:2.0:oob` ou `https://oauth.pstmn.io/v1/callback`).
    - Notez le `Client ID` et le `Client Secret`.
    - Enregistrez `CHROME_CLIENT_ID` et `CHROME_CLIENT_SECRET` dans GitHub Secrets.
 
