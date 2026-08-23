@@ -242,5 +242,77 @@
   "btnOpenInImmoBoussole": {
     "message": "👁️ Open in Immo-Boussole ↗",
     "description": "Button to open existing listing in Immo-Boussole"
+  },
+  "btnParseListing": {
+    "message": "🔍 Parse & Preview Listing",
+    "description": "Button to parse and preview listing details"
+  },
+  "btnParsing": {
+    "message": "🔍 Parsing...",
+    "description": "Button text while parsing is active"
+  },
+  "usePreparsedDataLabel": {
+    "message": "Import listing with this pre-parsed data",
+    "description": "Checkbox label to import with pre-parsed data"
+  },
+  "preparsedTitle": {
+    "message": "Detected Listing Data",
+    "description": "Title for parsed listing preview card"
+  },
+  "noDataDetected": {
+    "message": "No listing metadata detected on this page.",
+    "description": "Message when no listing data is found"
+  },
+  "previewPrice": {
+    "message": "Price",
+    "description": "Label for price preview"
+  },
+  "previewLivingArea": {
+    "message": "Living Area",
+    "description": "Label for living area preview"
+  },
+  "previewLandArea": {
+    "message": "Land Area",
+    "description": "Label for land area preview"
+  },
+  "previewRooms": {
+    "message": "Rooms",
+    "description": "Label for rooms preview"
+  },
+  "previewBedrooms": {
+    "message": "Bedrooms",
+    "description": "Label for bedrooms preview"
+  },
+  "previewBathrooms": {
+    "message": "Bathrooms",
+    "description": "Label for bathrooms preview"
+  },
+  "previewLocation": {
+    "message": "Location",
+    "description": "Label for location preview"
+  },
+  "previewDpe": {
+    "message": "DPE / GES",
+    "description": "Label for DPE and GES preview"
+  },
+  "previewTax": {
+    "message": "Land Tax",
+    "description": "Label for land tax preview"
+  },
+  "previewCharges": {
+    "message": "Charges",
+    "description": "Label for charges preview"
+  },
+  "previewPhotos": {
+    "message": "Photos",
+    "description": "Label for photos count"
+  },
+  "previewFloorplans": {
+    "message": "Floorplans",
+    "description": "Label for floorplans count"
+  },
+  "previewDescription": {
+    "message": "Description",
+    "description": "Label for description preview"
   }
 }

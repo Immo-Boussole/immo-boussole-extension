@@ -4,6 +4,7 @@ export interface ExtensionConfig {
   username?: string;
   activeTab?: 'apikey' | 'userpass';
   openTabAfterImport?: boolean;
+  usePreparsedData?: boolean;
 }
 
 export interface ExternalListingPayload {

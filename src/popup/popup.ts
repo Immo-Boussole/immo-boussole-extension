@@ -45,9 +45,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     configCard.classList.toggle('collapsed');
   });
 
-  // New tab options
+  // New tab & pre-parse options
   const openTabCheckbox = document.getElementById('open-tab-checkbox') as HTMLInputElement;
+  const usePreparsedCheckbox = document.getElementById('use-preparsed-checkbox') as HTMLInputElement;
   const btnViewListing = document.getElementById('btn-view-listing') as HTMLButtonElement;
+  const btnParse = document.getElementById('btn-parse') as HTMLButtonElement;
+
+  // Pre-parsed Preview Card Elements
+  const parsedPreviewCard = document.getElementById('parsed-preview-card') as HTMLDivElement;
+  const previewThumbnails = document.getElementById('preview-thumbnails') as HTMLDivElement;
+  const previewPhotosBadge = document.getElementById('preview-photos-badge') as HTMLSpanElement;
+  const previewPlansBadge = document.getElementById('preview-plans-badge') as HTMLSpanElement;
+  const prevTitle = document.getElementById('prev-title') as HTMLSpanElement;
+  const prevPrice = document.getElementById('prev-price') as HTMLSpanElement;
+  const prevArea = document.getElementById('prev-area') as HTMLSpanElement;
+  const prevLand = document.getElementById('prev-land') as HTMLSpanElement;
+  const prevRooms = document.getElementById('prev-rooms') as HTMLSpanElement;
+  const prevBaths = document.getElementById('prev-baths') as HTMLSpanElement;
+  const prevLocation = document.getElementById('prev-location') as HTMLSpanElement;
+  const prevDpe = document.getElementById('prev-dpe') as HTMLSpanElement;
+  const prevTax = document.getElementById('prev-tax') as HTMLSpanElement;
+  const prevDesc = document.getElementById('prev-description') as HTMLDivElement;
+
+  let cachedParsedPayload: any = null;
 
   // Tabs
   const tabBtnApiKey = document.getElementById('tab-btn-apikey') as HTMLButtonElement;
@@ -81,10 +101,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (config.apiKey) apiKeyInput.value = config.apiKey;
   if (config.username) usernameInput.value = config.username;
 
-  // Open tab checkbox state
+  // Checkboxes state
   openTabCheckbox.checked = config.openTabAfterImport !== false;
   openTabCheckbox.addEventListener('change', () => {
     saveStoredConfig({ openTabAfterImport: openTabCheckbox.checked });
+  });
+
+  usePreparsedCheckbox.checked = config.usePreparsedData !== false;
+  usePreparsedCheckbox.addEventListener('change', () => {
+    saveStoredConfig({ usePreparsedData: usePreparsedCheckbox.checked });
   });
 
   // Restore active tab
@@ -273,26 +298,159 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  function renderParsedPreview(payload: any) {
+    if (!payload) return;
+    cachedParsedPayload = payload;
+
+    // Photos
+    previewThumbnails.innerHTML = '';
+    if (payload.photos && Array.isArray(payload.photos) && payload.photos.length > 0) {
+      previewPhotosBadge.style.display = 'inline-block';
+      previewPhotosBadge.textContent = `📸 ${payload.photos.length}`;
+      payload.photos.slice(0, 8).forEach((src: string) => {
+        const img = document.createElement('img');
+        img.className = 'preview-thumb';
+        img.src = src;
+        img.alt = 'Photo';
+        img.onerror = () => img.remove();
+        previewThumbnails.appendChild(img);
+      });
+      previewThumbnails.style.display = 'flex';
+    } else {
+      previewPhotosBadge.style.display = 'none';
+      previewThumbnails.style.display = 'none';
+    }
+
+    // Plans (Floorplans)
+    if (payload.floorplans && Array.isArray(payload.floorplans) && payload.floorplans.length > 0) {
+      previewPlansBadge.style.display = 'inline-block';
+      previewPlansBadge.textContent = `📐 Plans (${payload.floorplans.length})`;
+    } else {
+      previewPlansBadge.style.display = 'none';
+    }
+
+    // Title
+    prevTitle.textContent = payload.title || '-';
+
+    // Price
+    if (typeof payload.price === 'number' && payload.price > 0) {
+      try {
+        prevPrice.textContent = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(payload.price);
+      } catch (e) {
+        prevPrice.textContent = `${payload.price} €`;
+      }
+    } else {
+      prevPrice.textContent = '-';
+    }
+
+    // Surfaces
+    prevArea.textContent = payload.area ? `${payload.area} m²` : '-';
+    prevLand.textContent = payload.land_area ? `${payload.land_area} m²` : '-';
+
+    // Rooms & Bedrooms
+    if (payload.rooms || payload.bedrooms) {
+      const parts: string[] = [];
+      if (payload.rooms) parts.push(`${payload.rooms} p.`);
+      if (payload.bedrooms) parts.push(`${payload.bedrooms} ch.`);
+      prevRooms.textContent = parts.join(' / ') || '-';
+    } else {
+      prevRooms.textContent = '-';
+    }
+
+    // Bathrooms
+    prevBaths.textContent = payload.bathroom_count ? `${payload.bathroom_count}` : '-';
+
+    // Location
+    prevLocation.textContent = payload.location || payload.city || '-';
+
+    // DPE / GES
+    const dpeParts: string[] = [];
+    if (payload.dpe_rating) dpeParts.push(`DPE: ${payload.dpe_rating}`);
+    if (payload.ges_rating) dpeParts.push(`GES: ${payload.ges_rating}`);
+    prevDpe.textContent = dpeParts.join(' / ') || '-';
+
+    // Taxes
+    prevTax.textContent = payload.land_tax ? `${payload.land_tax} €` : '-';
+
+    // Description
+    prevDesc.textContent = payload.description || '-';
+
+    parsedPreviewCard.style.display = 'block';
+  }
+
+  // Parse & Preview listing handler
+  btnParse.addEventListener('click', async () => {
+    const originalText = btnParse.innerHTML;
+    btnParse.innerHTML = t('btnParsing');
+    btnParse.disabled = true;
+
+    try {
+      const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+      if (tabs[0] && tabs[0].url) {
+        let extracted: any = null;
+        if (tabs[0].id) {
+          try {
+            extracted = await Promise.race([
+              browser.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_LISTING' }),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3500))
+            ]);
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        if (extracted && typeof extracted === 'object' && (extracted.title || extracted.price || extracted.area || extracted.photos)) {
+          renderParsedPreview(extracted);
+          addStatusMsg.className = 'status-msg success';
+          addStatusMsg.textContent = t('preparsedTitle');
+        } else {
+          renderParsedPreview({ url: tabs[0].url, title: tabs[0].title || 'Page active' });
+          addStatusMsg.className = 'status-msg';
+          addStatusMsg.textContent = t('noDataDetected');
+        }
+      } else {
+        addStatusMsg.className = 'status-msg error';
+        addStatusMsg.textContent = t('activeTabError');
+      }
+    } catch (err: any) {
+      addStatusMsg.className = 'status-msg error';
+      addStatusMsg.textContent = err.message || t('addError');
+    } finally {
+      btnParse.innerHTML = originalText;
+      btnParse.disabled = false;
+    }
+  });
+
   // Add current tab with rich DOM pre-extraction
   btnAddCurrent.addEventListener('click', async () => {
     try {
       const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       if (tabs[0] && tabs[0].url) {
         let payload: any = { url: tabs[0].url };
-        if (tabs[0].id) {
-          try {
-            // Attempt to get rich extracted payload from content script
-            const extracted = await Promise.race([
-              browser.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_LISTING' }),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
-            ]);
-            if (extracted && typeof extracted === 'object' && extracted.url) {
-              payload = extracted;
+
+        // If user wants pre-parsed data, attempt extraction or use cached
+        if (usePreparsedCheckbox.checked) {
+          if (cachedParsedPayload && cachedParsedPayload.url === tabs[0].url) {
+            payload = cachedParsedPayload;
+          } else if (tabs[0].id) {
+            try {
+              const extracted = await Promise.race([
+                browser.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_LISTING' }),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500))
+              ]);
+              if (extracted && typeof extracted === 'object' && extracted.url) {
+                payload = extracted;
+                renderParsedPreview(payload);
+              }
+            } catch (e) {
+              // fallback to basic URL payload
             }
-          } catch (e) {
-            // Content script not ready or timeout, fallback to basic URL payload
           }
+        } else {
+          // Explicitly send only URL if unchecked
+          payload = { url: tabs[0].url };
         }
+
         await sendPayloadToBackend(payload);
       } else {
         addStatusMsg.className = 'status-msg error';
@@ -312,7 +470,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       addStatusMsg.textContent = t('invalidUrl');
       return;
     }
-    await sendPayloadToBackend({ url });
+    const payload: any = { url };
+    if (usePreparsedCheckbox.checked && cachedParsedPayload && cachedParsedPayload.url === url) {
+      await sendPayloadToBackend(cachedParsedPayload);
+    } else {
+      await sendPayloadToBackend(payload);
+    }
   });
 
   function isCloudflareResponse(resp: Response, text: string): boolean {

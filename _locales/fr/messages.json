@@ -242,5 +242,77 @@
   "btnOpenInImmoBoussole": {
     "message": "👁️ Ouvrir dans Immo-Boussole ↗",
     "description": "Button to open existing listing in Immo-Boussole"
+  },
+  "btnParseListing": {
+    "message": "🔍 Parser l'annonce",
+    "description": "Button to parse and preview listing details"
+  },
+  "btnParsing": {
+    "message": "🔍 Analyse en cours...",
+    "description": "Button text while parsing is active"
+  },
+  "usePreparsedDataLabel": {
+    "message": "Importer l'annonce avec ces infos pré-parsées",
+    "description": "Checkbox label to import with pre-parsed data"
+  },
+  "preparsedTitle": {
+    "message": "Données Détectées",
+    "description": "Title for parsed listing preview card"
+  },
+  "noDataDetected": {
+    "message": "Aucune métadonnée d'annonce détectée sur cette page.",
+    "description": "Message when no listing data is found"
+  },
+  "previewPrice": {
+    "message": "Prix",
+    "description": "Label for price preview"
+  },
+  "previewLivingArea": {
+    "message": "Surf. Habitable",
+    "description": "Label for living area preview"
+  },
+  "previewLandArea": {
+    "message": "Terrain",
+    "description": "Label for land area preview"
+  },
+  "previewRooms": {
+    "message": "Pièces",
+    "description": "Label for rooms preview"
+  },
+  "previewBedrooms": {
+    "message": "Chambres",
+    "description": "Label for bedrooms preview"
+  },
+  "previewBathrooms": {
+    "message": "Salles de bain",
+    "description": "Label for bathrooms preview"
+  },
+  "previewLocation": {
+    "message": "Localisation",
+    "description": "Label for location preview"
+  },
+  "previewDpe": {
+    "message": "DPE / GES",
+    "description": "Label for DPE and GES preview"
+  },
+  "previewTax": {
+    "message": "Taxe Foncière",
+    "description": "Label for land tax preview"
+  },
+  "previewCharges": {
+    "message": "Charges",
+    "description": "Label for charges preview"
+  },
+  "previewPhotos": {
+    "message": "Photos",
+    "description": "Label for photos count"
+  },
+  "previewFloorplans": {
+    "message": "Plans",
+    "description": "Label for floorplans count"
+  },
+  "previewDescription": {
+    "message": "Description",
+    "description": "Label for description preview"
   }
 }

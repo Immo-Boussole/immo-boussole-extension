@@ -88,16 +88,89 @@
   <div class="card">
     <h2 data-i18n="addListingHeader">Add Listing</h2>
     <p class="subtitle" data-i18n="addListingSubtitle">Add the current active tab or enter a listing URL:</p>
-    <button type="button" id="btn-add-current" class="btn btn-action" data-i18n="btnAddCurrentTab">
-      ➕ Add Current Tab
-    </button>
+    
+    <div class="actions-row">
+      <button type="button" id="btn-add-current" class="btn btn-action" data-i18n="btnAddCurrentTab">
+        ➕ Add Current Tab
+      </button>
+      <button type="button" id="btn-parse" class="btn btn-secondary btn-parse" data-i18n="btnParseListing" title="Extract and inspect detected metadata">
+        🔍 Parse & Preview
+      </button>
+    </div>
     
     <div class="manual-input">
       <input type="url" id="manual-url" data-i18n-placeholder="manualUrlPlaceholder" placeholder="https://www.leboncoin.fr/ad/..." />
       <button type="button" id="btn-add-manual" class="btn btn-secondary" data-i18n="btnAddManual">Add</button>
     </div>
 
+    <!-- Pre-parsed Listing Data Preview Panel (Collapsible) -->
+    <div id="parsed-preview-card" class="preview-panel" style="display: none;">
+      <div class="preview-header">
+        <div class="preview-title-wrap">
+          <span class="preview-icon">📋</span>
+          <h3 data-i18n="preparsedTitle">Detected Listing Data</h3>
+        </div>
+        <div class="preview-badges">
+          <span id="preview-photos-badge" class="badge badge-meta" style="display: none;">📸 0</span>
+          <span id="preview-plans-badge" class="badge badge-plans" style="display: none;">📐 Plans</span>
+        </div>
+      </div>
+
+      <!-- Photo Thumbnails Strip -->
+      <div id="preview-thumbnails" class="preview-thumbnails"></div>
+
+      <!-- Key Characteristics Grid -->
+      <div class="preview-grid">
+        <div class="preview-item preview-item-full">
+          <span class="preview-label" data-i18n="previewTitle">Titre</span>
+          <span id="prev-title" class="preview-val preview-val-title">-</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label" data-i18n="previewPrice">Prix</span>
+          <span id="prev-price" class="preview-val highlight">-</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label" data-i18n="previewLivingArea">Surf. Habitable</span>
+          <span id="prev-area" class="preview-val">-</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label" data-i18n="previewLandArea">Terrain</span>
+          <span id="prev-land" class="preview-val">-</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label" data-i18n="previewRooms">Pièces / Ch.</span>
+          <span id="prev-rooms" class="preview-val">-</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label" data-i18n="previewBathrooms">Salles de bain</span>
+          <span id="prev-baths" class="preview-val">-</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label" data-i18n="previewLocation">Localisation</span>
+          <span id="prev-location" class="preview-val">-</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label" data-i18n="previewDpe">DPE / GES</span>
+          <span id="prev-dpe" class="preview-val">-</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label" data-i18n="previewTax">Taxe Foncière</span>
+          <span id="prev-tax" class="preview-val">-</span>
+        </div>
+      </div>
+
+      <!-- Description Snippet -->
+      <div class="preview-desc-wrapper">
+        <span class="preview-label" data-i18n="previewDescription">Description</span>
+        <div id="prev-description" class="preview-desc-text">-</div>
+      </div>
+    </div>
+
     <div class="checkbox-container">
+      <label class="checkbox-label" title="Si coché, transmet l'ensemble des données pré-parsées (photos HD, plans, caractéristiques) au serveur">
+        <input type="checkbox" id="use-preparsed-checkbox" checked />
+        <span data-i18n="usePreparsedDataLabel">Importer l'annonce avec ces infos pré-parsées</span>
+      </label>
       <label class="checkbox-label">
         <input type="checkbox" id="open-tab-checkbox" checked />
         <span data-i18n="openTabAfterImport">Ouvrir un nouvel onglet après l'import</span>
