@@ -11,6 +11,18 @@ Official browser extension for **Immo-Boussole**, compatible with **Firefox**, *
 
 ---
 
+## 📸 Preview
+
+<p align="center">
+  <img src="assets/screenshot-1-showcase.png" alt="Immo-Boussole Extension Showcase" width="800" />
+</p>
+
+<p align="center">
+  <img src="assets/screenshot-2-popup.png" alt="Immo-Boussole Popup Control & Config" width="800" />
+</p>
+
+---
+
 ## 🌟 Features
 
 - **Integrated Action Buttons**: Automatically injects *"🧭 Add to Immo-Boussole"* buttons on listing cards in search results and directly on property detail pages across supported platforms (**LeBonCoin**, **Figaro Immobilier**).

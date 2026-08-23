@@ -11,6 +11,18 @@ Extension officielle pour **Immo-Boussole**, compatible avec **Firefox**, **Goog
 
 ---
 
+## 📸 Aperçu
+
+<p align="center">
+  <img src="assets/screenshot-1-showcase.png" alt="Aperçu Immo-Boussole Extension" width="800" />
+</p>
+
+<p align="center">
+  <img src="assets/screenshot-2-popup.png" alt="Configuration et contrôle Immo-Boussole" width="800" />
+</p>
+
+---
+
 ## 🌟 Fonctionnalités
 
 - **Boutons d'action intégrés** : Inscription automatique de boutons *"🧭 Ajouter à Immo-Boussole"* sur chaque carte d'annonce (recherche) et directement sur les pages d'annonces détaillées (**LeBonCoin**, **Figaro Immobilier**).

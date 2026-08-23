@@ -8,6 +8,7 @@
     "build": "tsc && node scripts/build.js chrome && node scripts/build.js firefox",
     "build:firefox": "tsc && node scripts/build.js firefox",
     "build:chrome": "tsc && node scripts/build.js chrome",
+    "screenshots": "node scripts/generate_screenshots.js",
     "package": "node scripts/package.js"
   },
   "dependencies": {
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/webextension-polyfill": "^0.10.7",
+    "puppeteer": "^25.8.0",
     "typescript": "^5.3.3",
     "vite": "^5.1.0"
   }
