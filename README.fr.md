@@ -14,11 +14,11 @@ Extension officielle pour **Immo-Boussole**, compatible avec **Firefox**, **Goog
 ## 📸 Aperçu
 
 <p align="center">
-  <img src="assets/screenshot-1-showcase.png" alt="Aperçu Immo-Boussole Extension" width="800" />
+  <img src="assets/screenshot-1-showcase-fr.png" alt="Aperçu Immo-Boussole Extension" width="800" />
 </p>
 
 <p align="center">
-  <img src="assets/screenshot-2-popup.png" alt="Configuration et contrôle Immo-Boussole" width="800" />
+  <img src="assets/screenshot-2-popup-fr.png" alt="Configuration et contrôle Immo-Boussole" width="800" />
 </p>
 
 ---

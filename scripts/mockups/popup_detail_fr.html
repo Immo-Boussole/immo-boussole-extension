@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1280, height=800">
+  <title>Détail Contrôle Immo-Boussole (Français)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    body {
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      background: radial-gradient(circle at top right, #1e293b, #0f172a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 60px;
+      padding: 40px;
+    }
+    
+    /* Left Description Column */
+    .feature-column {
+      width: 480px;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      width: fit-content;
+    }
+    .main-title {
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.5px;
+    }
+    .main-desc {
+      font-size: 16px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .feature-icon {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #38bdf8;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .feature-text h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 2px;
+    }
+    .feature-text p {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    
+    /* Right Extension Popup Mockup */
+    .popup-container {
+      width: 380px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+    .popup-header {
+      background: #0f172a;
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e293b;
+    }
+    .popup-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .popup-version {
+      background: #334155;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #94a3b8;
+    }
+    .badge-connected {
+      background: #065f46;
+      color: #34d399;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-connected::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      background: #34d399;
+      border-radius: 50%;
+    }
+    
+    .popup-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #f8fafc;
+    }
+    
+    /* Accordion Config */
+    .config-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .config-header {
+      padding: 12px 16px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+    }
+    .config-body {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+    .form-input {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #0f172a;
+      font-family: monospace;
+    }
+    
+    /* Action Buttons */
+    .btn-action-primary {
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .checkbox-row input {
+      accent-color: #2563eb;
+    }
+    .popup-footer {
+      font-size: 11px;
+      color: #94a3b8;
+      text-align: center;
+      padding-top: 6px;
+      border-top: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Left Description Column -->
+  <div class="feature-column">
+    <div class="brand-tag">
+      <span>🧭</span>
+      <span>Extension Officielle Compagnon</span>
+    </div>
+    
+    <h1 class="main-title">Synchronisation Immobilière Directe</h1>
+    <p class="main-desc">Connectez directement votre navigateur à votre instance privée Immo-Boussole pour capturer instantanément des annonces, détecter les doublons et enrichir vos données.</p>
+    
+    <div class="feature-list">
+      <div class="feature-item">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-text">
+          <h4>Importation en 1 Clic</h4>
+          <p>Extrayez instantanément tous les détails des annonces depuis les grands portails immobiliers.</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🔍</div>
+        <div class="feature-text">
+          <h4>Détection des Doublons en Direct</h4>
+          <p>Le badge vert ✔ vous signale en temps réel si un bien est déjà dans votre base de données.</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-text">
+          <h4>Clé d'API Privée Sécurisée</h4>
+          <p>Stockage local sécurisé des identifiants avec authentification Bearer Token.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Extension Popup Mockup -->
+  <div class="popup-container">
+    <div class="popup-header">
+      <div class="popup-brand">
+        <img src="../../icons/icon32.png" width="22" height="22" alt="Logo" />
+        <span>Immo-Boussole</span>
+        <span class="popup-version">v1.0.0</span>
+      </div>
+      <span class="badge-connected">Connecté</span>
+    </div>
+
+    <div class="popup-body">
+      <!-- Collapsible Server Config -->
+      <div class="config-card">
+        <div class="config-header">
+          <span>Configuration Serveur</span>
+          <span style="font-size: 11px; color: #2563eb;">▼ Détails</span>
+        </div>
+        <div class="config-body">
+          <div class="form-group">
+            <label class="form-label">URL de votre instance</label>
+            <div class="form-input">https://immo.exemple.fr</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Clé d'API d'authentification</label>
+            <div class="form-input">••••••••••••••••••••••••••••••••</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Action Button -->
+      <button class="btn-action-primary">
+        <span>➕</span>
+        <span>Ajouter l'onglet actif</span>
+      </button>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="open-tab" checked />
+        <label for="open-tab">Ouvrir l'annonce après import</label>
+      </div>
+
+      <div class="popup-footer">
+        Connecté à https://immo.exemple.fr
+      </div>
+    </div>
+  </div>
+</body>
+</html>

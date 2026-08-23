@@ -41,24 +41,24 @@ async function run() {
 
   const page = await browser.newPage();
 
-  // 1. Screenshot 1: Showcase
-  const showcasePath = 'file:///' + resolve(rootDir, 'scripts/mockups/showcase.html').replace(/\\/g, '/');
-  console.log(`Navigating to ${showcasePath}...`);
-  await page.goto(showcasePath, { waitUntil: 'networkidle0' });
-  const out1 = resolve(assetsDir, 'screenshot-1-showcase.png');
-  await page.screenshot({ path: out1, clip: { x: 0, y: 0, width: 1280, height: 800 } });
-  console.log(`Generated: ${out1}`);
+  const targets = [
+    { html: 'scripts/mockups/showcase.html', out: 'assets/screenshot-1-showcase.png' },
+    { html: 'scripts/mockups/popup_detail.html', out: 'assets/screenshot-2-popup.png' },
+    { html: 'scripts/mockups/showcase_fr.html', out: 'assets/screenshot-1-showcase-fr.png' },
+    { html: 'scripts/mockups/popup_detail_fr.html', out: 'assets/screenshot-2-popup-fr.png' },
+  ];
 
-  // 2. Screenshot 2: Popup Detail
-  const popupPath = 'file:///' + resolve(rootDir, 'scripts/mockups/popup_detail.html').replace(/\\/g, '/');
-  console.log(`Navigating to ${popupPath}...`);
-  await page.goto(popupPath, { waitUntil: 'networkidle0' });
-  const out2 = resolve(assetsDir, 'screenshot-2-popup.png');
-  await page.screenshot({ path: out2, clip: { x: 0, y: 0, width: 1280, height: 800 } });
-  console.log(`Generated: ${out2}`);
+  for (const target of targets) {
+    const fullHtmlPath = 'file:///' + resolve(rootDir, target.html).replace(/\\/g, '/');
+    const fullOutPath = resolve(rootDir, target.out);
+    console.log(`Rendering ${target.html} -> ${target.out}...`);
+    await page.goto(fullHtmlPath, { waitUntil: 'networkidle0' });
+    await page.screenshot({ path: fullOutPath, clip: { x: 0, y: 0, width: 1280, height: 800 } });
+    console.log(`✓ Generated: ${target.out}`);
+  }
 
   await browser.close();
-  console.log('Screenshots generation completed successfully!');
+  console.log('All screenshots generated successfully!');
 }
 
 run().catch((err) => {
