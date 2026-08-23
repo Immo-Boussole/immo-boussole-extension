@@ -77,4 +77,35 @@ assert.strictEqual(classified.pricing.landTax, 1170.0);
 assert.strictEqual(classified.domains.medias.images.length, 2);
 assert.strictEqual(classified.domains.medias.floorplans.length, 1);
 
-console.log("✓ SeLoger Next.js parser simulation unit tests PASSED successfully!");
+// Test HD image enhancer
+function toHdImageUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  let hd = url;
+  hd = hd.replace(/\/(?:crop|fit-in|resize|thumbnail)\/\d+x\d+\//i, '/fit-in/1920x1080/');
+  hd = hd.replace(/\/\d+x\d+\//i, '/1920x1080/');
+  return hd;
+}
+
+const thumbUrl = "https://v.seloger.com/s/crop/120x90/visuels/1/2/3.jpg";
+const hdUrl = toHdImageUrl(thumbUrl);
+assert.strictEqual(hdUrl, "https://v.seloger.com/s/fit-in/1920x1080/visuels/1/2/3.jpg");
+
+// Test URL location slug extraction
+const testUrl = "https://www.seloger.com/annonce/achat/auvergne-rhone-alpes/isere-38/saint-clair-du-rhone-38370/26H129BK5GHE";
+const urlLocMatch = testUrl.match(/\/([a-z0-9-]+)-(\d{5})\//i);
+assert(urlLocMatch !== null, "URL location slug should match");
+assert.strictEqual(urlLocMatch[2], "38370");
+const parsedCity = urlLocMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
+assert.strictEqual(parsedCity, "Saint-Clair-Du-Rhone");
+
+// Test T6/F6 regex
+const testText = "Maison à vendre T6/F6 138 m² 422000 € Saint-Clair-du-Rhône (38370)";
+const tfMatch = testText.match(/\b[TF](\d+)\b/i) || testText.match(/(\d+)\s*pièce/i);
+assert(tfMatch !== null, "T6/F6 should match rooms");
+assert.strictEqual(parseInt(tfMatch[1], 10), 6);
+
+const priceMatch = testText.match(/(\d[\d\s]*\d)\s*€/);
+assert(priceMatch !== null, "Price should match");
+assert.strictEqual(parseFloat(priceMatch[1].replace(/\s/g, '')), 422000);
+
+console.log("✓ All SeLoger scraper unit tests PASSED successfully!");

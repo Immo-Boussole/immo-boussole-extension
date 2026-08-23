@@ -122,21 +122,74 @@ function parseJsonScripts() {
     }
     return null;
 }
+// Convert thumbnail / cropped SeLoger image URLs to maximum HD resolution
+export function toHdImageUrl(url) {
+    if (!url || typeof url !== 'string')
+        return url;
+    let hd = url;
+    // Replace sizing in path (e.g. /120x90/ or /crop/120x90/ or /fit-in/300x200/)
+    hd = hd.replace(/\/(?:crop|fit-in|resize|thumbnail)\/\d+x\d+\//i, '/fit-in/1920x1080/');
+    hd = hd.replace(/\/\d+x\d+\//i, '/1920x1080/');
+    // Replace query parameters sizing (e.g. ?w=120&h=90)
+    try {
+        const u = new URL(hd);
+        if (u.searchParams.has('w') || u.searchParams.has('width')) {
+            u.searchParams.set('w', '1920');
+            u.searchParams.delete('h');
+            u.searchParams.delete('height');
+            hd = u.toString();
+        }
+    }
+    catch (e) {
+        // ignore
+    }
+    return hd;
+}
+function parseJsonLdScripts() {
+    const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+    for (let i = 0; i < scripts.length; i++) {
+        const text = scripts[i].textContent;
+        if (!text)
+            continue;
+        try {
+            const parsed = JSON.parse(text);
+            const items = Array.isArray(parsed) ? parsed : (parsed['@graph'] ? parsed['@graph'] : [parsed]);
+            for (const item of items) {
+                if (item &&
+                    (item['@type'] === 'SingleFamilyResidence' ||
+                        item['@type'] === 'Apartment' ||
+                        item['@type'] === 'House' ||
+                        item['@type'] === 'RealEstateListing' ||
+                        item['@type'] === 'Product' ||
+                        item.offers ||
+                        item.floorSize ||
+                        item.numberOfRooms)) {
+                    return item;
+                }
+            }
+        }
+        catch (e) {
+            // ignore
+        }
+    }
+    return null;
+}
 function extractImageUrls(mediaList) {
     const urls = [];
     if (!Array.isArray(mediaList))
         return urls;
     for (const item of mediaList) {
+        let candidate;
         if (typeof item === 'string' && item.startsWith('http')) {
-            if (!urls.includes(item))
-                urls.push(item);
+            candidate = item;
         }
         else if (item && typeof item === 'object') {
-            const candidate = item.hdUrl || item.largeUrl || item.fullUrl || item.url || item.src || item.path;
-            if (typeof candidate === 'string' && candidate.startsWith('http')) {
-                if (!urls.includes(candidate))
-                    urls.push(candidate);
-            }
+            candidate = item.hdUrl || item.largeUrl || item.fullUrl || item.url || item.src || item.path || item.contentUrl;
+        }
+        if (candidate && typeof candidate === 'string' && candidate.startsWith('http')) {
+            const hd = toHdImageUrl(candidate);
+            if (!urls.includes(hd))
+                urls.push(hd);
         }
     }
     return urls;
@@ -312,7 +365,50 @@ export async function extractSelogerDetailPageAsync() {
             });
         }
     }
-    // 2. DOM Fallbacks for any missing fields
+    // 2. Structured JSON-LD extraction if available
+    const jsonLd = parseJsonLdScripts();
+    if (jsonLd) {
+        if (!title && jsonLd.name)
+            title = jsonLd.name;
+        if (!description && jsonLd.description)
+            description = jsonLd.description;
+        if (!price && jsonLd.offers?.price) {
+            const num = Number(jsonLd.offers.price);
+            if (!isNaN(num) && num > 0)
+                price = num;
+        }
+        if (!area && jsonLd.floorSize?.value) {
+            const num = Number(jsonLd.floorSize.value);
+            if (!isNaN(num) && num > 0)
+                area = num;
+        }
+        if (!rooms && jsonLd.numberOfRooms) {
+            const num = Number(jsonLd.numberOfRooms);
+            if (!isNaN(num) && num > 0)
+                rooms = num;
+        }
+        if (!bedrooms && jsonLd.numberOfBedrooms) {
+            const num = Number(jsonLd.numberOfBedrooms);
+            if (!isNaN(num) && num > 0)
+                bedrooms = num;
+        }
+        if (!bathroom_count && jsonLd.numberOfBathroomsTotal) {
+            const num = Number(jsonLd.numberOfBathroomsTotal);
+            if (!isNaN(num) && num > 0)
+                bathroom_count = num;
+        }
+        if (!city && jsonLd.address?.addressLocality)
+            city = jsonLd.address.addressLocality;
+        if (!postal_code && jsonLd.address?.postalCode)
+            postal_code = String(jsonLd.address.postalCode);
+        if (jsonLd.image) {
+            const ldImages = Array.isArray(jsonLd.image) ? jsonLd.image : [jsonLd.image];
+            const extracted = extractImageUrls(ldImages);
+            extracted.forEach(u => { if (!photos.includes(u))
+                photos.push(u); });
+        }
+    }
+    // 3. DOM & URL Fallbacks for any missing fields
     if (!title) {
         const h1 = document.querySelector('h1');
         title = h1 ? h1.textContent?.trim() : document.title;
@@ -334,23 +430,27 @@ export async function extractSelogerDetailPageAsync() {
             area = parseFloat(areaMatch[1].replace(',', '.'));
     }
     if (!land_area) {
-        const landMatch = pageText.match(/(?:terrain|parcelle)(?:\s+de)?\s*(\d+([\.,]\d+)?)\s*m²/i) ||
-            pageText.match(/(\d+([\.,]\d+)?)\s*m²\s*(?:de\s+terrain|terrain)/i);
+        const landMatch = pageText.match(/(?:terrain|parcelle|jardin)(?:\s+de)?\s*(\d+([\.,]\d+)?)\s*m²/i) ||
+            pageText.match(/(\d+([\.,]\d+)?)\s*m²\s*(?:de\s+terrain|terrain|de\s+parcelle|parcelle)/i);
         if (landMatch)
             land_area = parseFloat(landMatch[1].replace(',', '.'));
     }
     if (!rooms) {
-        const roomsMatch = pageText.match(/(\d+)\s*pièce/i);
-        if (roomsMatch)
-            rooms = parseInt(roomsMatch[1], 10);
+        const tfMatch = pageText.match(/\b[TF](\d+)\b/i) ||
+            pageText.match(/(\d+)\s*pièce/i) ||
+            pageText.match(/(\d+)\s*p\b/i);
+        if (tfMatch)
+            rooms = parseInt(tfMatch[1], 10);
     }
     if (!bedrooms) {
-        const bedMatch = pageText.match(/(\d+)\s*chambre/i);
+        const bedMatch = pageText.match(/(\d+)\s*chambre/i) ||
+            pageText.match(/(\d+)\s*ch\b/i);
         if (bedMatch)
             bedrooms = parseInt(bedMatch[1], 10);
     }
     if (!bathroom_count) {
-        const bathMatch = pageText.match(/(\d+)\s*salle[s]?\s*(?:de\s*bain|d'eau)/i);
+        const bathMatch = pageText.match(/(\d+)\s*salle[s]?\s*(?:de\s*bain|d'eau)/i) ||
+            pageText.match(/(\d+)\s*(?:sdb|sde)\b/i);
         if (bathMatch)
             bathroom_count = parseInt(bathMatch[1], 10);
     }
@@ -365,13 +465,33 @@ export async function extractSelogerDetailPageAsync() {
         const cityMatch = locText.match(/([A-ZÀ-ÿ][a-zà-ÿ-]+(?:\s+[A-ZÀ-ÿ][a-zà-ÿ-]+)*)\s*\(\d{5}\)/);
         if (cityMatch)
             city = cityMatch[1];
-        if (city && postal_code)
-            location = `${city} (${postal_code})`;
+    }
+    // URL location fallback (e.g. /saint-clair-du-rhone-38370/)
+    if (!postal_code || !city) {
+        const urlLocMatch = url.match(/\/([a-z0-9-]+)-(\d{5})\//i);
+        if (urlLocMatch) {
+            if (!postal_code)
+                postal_code = urlLocMatch[2];
+            if (!city) {
+                city = urlLocMatch[1]
+                    .split('-')
+                    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                    .join('-');
+            }
+        }
+    }
+    if (city && postal_code) {
+        location = `${city} (${postal_code})`;
+    }
+    else if (city) {
+        location = city;
     }
     if (!description) {
         const descEl = document.querySelector('[data-test="ad-description"]') ||
             document.querySelector('[class*="Description__"]') ||
-            document.querySelector('[data-qa="description"]');
+            document.querySelector('[data-qa="description"]') ||
+            document.querySelector('[class*="ShowMore__Wrapper"]') ||
+            document.querySelector('[class*="ReadMore__"]');
         if (descEl)
             description = descEl.textContent?.trim();
     }
@@ -390,6 +510,18 @@ export async function extractSelogerDetailPageAsync() {
         if (taxMatch)
             land_tax = parseFloat(taxMatch[1].replace(',', '.'));
     }
+    // Synthesize a descriptive title if empty or too generic
+    if (!title || title.length < 15 || /^Maison|Appartement$/i.test(title.trim())) {
+        const parts = [
+            property_type || (title ? title.trim() : 'Maison'),
+            rooms ? `T${rooms}` : undefined,
+            area ? `${Math.round(area)} m²` : undefined,
+            location || city
+        ].filter(Boolean);
+        if (parts.length >= 2) {
+            title = parts.join(' - ');
+        }
+    }
     // Fallback photo extraction from DOM images if none or very few
     if (photos.length < 3) {
         const imgEls = document.querySelectorAll('img[src*="seloger.com"], img[src*="slstatic.com"], img[src*="poliris.net"]');
@@ -397,12 +529,14 @@ export async function extractSelogerDetailPageAsync() {
             const src = img.src || img.getAttribute('src');
             if (src &&
                 src.startsWith('http') &&
-                !photos.includes(src) &&
                 !src.includes('logo') &&
                 !src.includes('avatar') &&
                 !src.includes('icon') &&
                 !src.includes('placeholder')) {
-                photos.push(src);
+                const hd = toHdImageUrl(src);
+                if (!photos.includes(hd)) {
+                    photos.push(hd);
+                }
             }
         });
     }
