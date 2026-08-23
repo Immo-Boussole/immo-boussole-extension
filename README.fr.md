@@ -62,6 +62,23 @@ npm install
 
 ---
 
-## 🌍 Traductions Communautaires
+## 🚀 Publication sur les Stores & CI/CD
 
-Vous souhaitez ajouter votre langue ? Consultez [TRANSLATING.md](TRANSLATING.md) pour un guide simple étape par étape !
+L'extension est automatiquement compilée, packagée, signée et publiée sur les Stores à chaque création d'un Tag de release Git (`v*`) :
+- **Chrome Web Store**
+- **Mozilla Firefox Add-ons (AMO)**
+- **Microsoft Edge Add-ons**
+
+Pour la création des comptes développeur et la configuration des Secrets GitHub, consultez le [Guide de Configuration Multi-Stores](docs/STORE_PUBLISHING_SETUP.md).
+
+---
+
+## 🌍 Traductions communautaires
+
+Vous souhaitez traduire l'extension dans une autre langue ? Consultez [TRANSLATING.md](TRANSLATING.md) pour un guide simple étape par étape !
+
+---
+
+## 🔐 Sécurité
+
+L'extension communique exclusivement avec votre instance privée Immo-Boussole via des requêtes API REST authentifiées par jeton d'accès sécurisé.

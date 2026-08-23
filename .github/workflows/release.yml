@@ -1,4 +1,4 @@
-name: Build & Release Extension
+name: Build, Package & Publish Extension
 
 on:
   push:
@@ -6,12 +6,19 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      publish_stores:
+        description: 'Publish and submit to Browser Extension Stores (Chrome, Firefox AMO, Edge)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  build-and-package:
+    name: 🔨 Build & Package Distributions
     runs-on: ubuntu-latest
 
     steps:
@@ -81,3 +88,98 @@ jobs:
             release/immo-boussole-chrome-edge.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-chrome:
+    name: 🌐 Publish to Chrome Web Store
+    needs: build-and-package
+    if: github.ref_type == 'tag' || inputs.publish_stores == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download built packages
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-dist-packages
+          path: release
+
+      - name: Check Chrome API Secrets
+        id: check-secrets
+        run: |
+          if [ -n "${{ secrets.CHROME_EXTENSION_ID }}" ] && [ -n "${{ secrets.CHROME_CLIENT_ID }}" ] && [ -n "${{ secrets.CHROME_CLIENT_SECRET }}" ] && [ -n "${{ secrets.CHROME_REFRESH_TOKEN }}" ]; then
+            echo "CONFIGURED=true" >> $GITHUB_OUTPUT
+          else
+            echo "CONFIGURED=false" >> $GITHUB_OUTPUT
+            echo "::warning::Chrome Web Store secrets are missing. Skipping upload. See docs/STORE_PUBLISHING_SETUP.md"
+          fi
+
+      - name: Upload & Publish to Chrome Web Store
+        if: steps.check-secrets.outputs.CONFIGURED == 'true'
+        uses: wxt-dev/publish-extension@v1
+        with:
+          chrome-zip: release/immo-boussole-chrome-edge.zip
+          chrome-extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
+          chrome-client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          chrome-client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          chrome-refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+
+  publish-firefox:
+    name: 🦊 Publish & Sign Mozilla Firefox (AMO)
+    needs: build-and-package
+    if: github.ref_type == 'tag' || inputs.publish_stores == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download built packages
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-dist-packages
+          path: release
+
+      - name: Check Firefox AMO Secrets
+        id: check-secrets
+        run: |
+          if [ -n "${{ secrets.AMO_JWT_ISSUER }}" ] && [ -n "${{ secrets.AMO_JWT_SECRET }}" ]; then
+            echo "CONFIGURED=true" >> $GITHUB_OUTPUT
+          else
+            echo "CONFIGURED=false" >> $GITHUB_OUTPUT
+            echo "::warning::Mozilla AMO API secrets are missing. Skipping upload. See docs/STORE_PUBLISHING_SETUP.md"
+          fi
+
+      - name: Upload, Sign & Publish to Mozilla AMO
+        if: steps.check-secrets.outputs.CONFIGURED == 'true'
+        uses: wxt-dev/publish-extension@v1
+        with:
+          firefox-zip: release/immo-boussole-firefox.zip
+          firefox-jwt-issuer: ${{ secrets.AMO_JWT_ISSUER }}
+          firefox-jwt-secret: ${{ secrets.AMO_JWT_SECRET }}
+          firefox-channel: listed
+
+  publish-edge:
+    name: 🌊 Publish to Microsoft Edge Add-ons
+    needs: build-and-package
+    if: github.ref_type == 'tag' || inputs.publish_stores == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download built packages
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-dist-packages
+          path: release
+
+      - name: Check Microsoft Edge Secrets
+        id: check-secrets
+        run: |
+          if [ -n "${{ secrets.EDGE_PRODUCT_ID }}" ] && [ -n "${{ secrets.EDGE_CLIENT_ID }}" ] && [ -n "${{ secrets.EDGE_CLIENT_SECRET }}" ] && [ -n "${{ secrets.EDGE_ACCESS_TOKEN_URL }}" ]; then
+            echo "CONFIGURED=true" >> $GITHUB_OUTPUT
+          else
+            echo "CONFIGURED=false" >> $GITHUB_OUTPUT
+            echo "::warning::Microsoft Edge Add-ons API secrets are missing. Skipping upload. See docs/STORE_PUBLISHING_SETUP.md"
+          fi
+
+      - name: Upload & Publish to Microsoft Edge Add-ons
+        if: steps.check-secrets.outputs.CONFIGURED == 'true'
+        uses: wxt-dev/publish-extension@v1
+        with:
+          edge-zip: release/immo-boussole-chrome-edge.zip
+          edge-product-id: ${{ secrets.EDGE_PRODUCT_ID }}
+          edge-client-id: ${{ secrets.EDGE_CLIENT_ID }}
+          edge-client-secret: ${{ secrets.EDGE_CLIENT_SECRET }}
+          edge-access-token-url: ${{ secrets.EDGE_ACCESS_TOKEN_URL }}

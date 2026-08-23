@@ -62,6 +62,17 @@ npm install
 
 ---
 
+## 🚀 Store Publishing & CI/CD
+
+The extension is automatically built, packaged, signed, and published to stores on every GitHub release tag (`v*`):
+- **Chrome Web Store**
+- **Mozilla Firefox Add-ons (AMO)**
+- **Microsoft Edge Add-ons**
+
+For setting up store developer accounts and GitHub Secrets, see the [Store Publishing Setup Guide](docs/STORE_PUBLISHING_SETUP.md).
+
+---
+
 ## 🌍 Community Translations
 
 Want to add your language? See [TRANSLATING.md](TRANSLATING.md) for a quick step-by-step guide!
@@ -71,3 +82,4 @@ Want to add your language? See [TRANSLATING.md](TRANSLATING.md) for a quick step
 ## 🔐 Security
 
 The extension interacts exclusively with your designated Immo-Boussole server instance via authenticated REST API tokens.
+
