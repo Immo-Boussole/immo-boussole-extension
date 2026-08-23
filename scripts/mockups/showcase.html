@@ -20,7 +20,7 @@
       flex-direction: column;
     }
     
-    /* Browser Chrome Frame */
+    /* Browser Frame */
     .browser-frame {
       background: #1e293b;
       border-bottom: 1px solid #334155;
@@ -185,7 +185,7 @@
       color: #64748b;
     }
     
-    /* Injected Extension Action Button */
+    /* Injected Action Button */
     .injected-action-bar {
       margin: 8px 0;
     }
@@ -271,7 +271,7 @@
     .spec-label { color: #64748b; }
     .spec-val { font-weight: 600; color: #0f172a; }
     
-    /* Extension Popup Overlay (Simulated Open State) */
+    /* Extension Popup Overlay */
     .popup-overlay {
       position: absolute;
       top: 12px;
@@ -388,7 +388,7 @@
   </style>
 </head>
 <body>
-  <!-- Browser Chrome Top Bar -->
+  <!-- Browser Frame -->
   <div class="browser-frame">
     <div class="browser-tabs">
       <div class="dots-container">
@@ -415,16 +415,15 @@
       </div>
       <div class="extension-icons">
         <div class="ext-icon-btn">
-          <img src="__ICON_32__" width="22" height="22" alt="Immo-Boussole Logo" />
+          <img src="__ICON_32__" width="22" height="22" alt="Logo" />
           <span class="ext-badge">✔</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Main Viewport Area -->
+  <!-- Viewport Area -->
   <div class="viewport">
-    <!-- Webpage Content -->
     <div class="page-content">
       <div class="portal-header">
         <div class="portal-logo">PORTAL IMMO</div>
@@ -442,7 +441,6 @@
         </div>
       </div>
 
-      <!-- Injected Button -->
       <div class="injected-action-bar">
         <div class="injected-btn">
           <img src="__ICON_32__" alt="Logo" />
@@ -450,7 +448,6 @@
         </div>
       </div>
 
-      <!-- Photos & Specs -->
       <div class="listing-body">
         <div class="photo-grid">
           <div class="photo-main"></div>
