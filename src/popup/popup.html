@@ -28,7 +28,10 @@
     <div class="saved-icon">✅</div>
     <div class="saved-info">
       <div class="saved-title" data-i18n="activeTabAlreadyImported">Cette annonce est déjà enregistrée dans Immo-Boussole.</div>
-      <button type="button" id="btn-open-existing-tab" class="btn btn-action btn-sm" data-i18n="btnOpenInImmoBoussole">👁️ Ouvrir dans Immo-Boussole ↗</button>
+      <div class="saved-actions">
+        <button type="button" id="btn-open-existing-tab" class="btn btn-action btn-sm" data-i18n="btnOpenInImmoBoussole">👁️ Ouvrir dans Immo-Boussole ↗</button>
+        <button type="button" id="btn-update-existing-tab" class="btn btn-secondary btn-sm" data-i18n="btnUpdateListing">🔄 Mettre à jour</button>
+      </div>
     </div>
   </div>
 
@@ -103,7 +106,7 @@
       <button type="button" id="btn-add-manual" class="btn btn-secondary" data-i18n="btnAddManual">Add</button>
     </div>
 
-    <!-- Pre-parsed Listing Data Preview Panel (Collapsible) -->
+    <!-- Pre-parsed Listing Data Preview Panel (Collapsible with editable inputs) -->
     <div id="parsed-preview-card" class="preview-panel" style="display: none;">
       <div class="preview-header">
         <div class="preview-title-wrap">
@@ -119,50 +122,74 @@
       <!-- Photo Thumbnails Strip -->
       <div id="preview-thumbnails" class="preview-thumbnails"></div>
 
-      <!-- Key Characteristics Grid -->
+      <!-- Key Characteristics Grid (Editable) -->
       <div class="preview-grid">
         <div class="preview-item preview-item-full">
           <span class="preview-label" data-i18n="previewTitle">Titre</span>
-          <span id="prev-title" class="preview-val preview-val-title">-</span>
+          <input type="text" id="prev-title" class="preview-input preview-input-title" placeholder="Titre de l'annonce..." />
         </div>
         <div class="preview-item">
-          <span class="preview-label" data-i18n="previewPrice">Prix</span>
-          <span id="prev-price" class="preview-val highlight">-</span>
+          <span class="preview-label" data-i18n="previewPrice">Prix (€)</span>
+          <input type="number" id="prev-price" class="preview-input highlight" placeholder="Ex: 350000" />
         </div>
         <div class="preview-item">
-          <span class="preview-label" data-i18n="previewLivingArea">Surf. Habitable</span>
-          <span id="prev-area" class="preview-val">-</span>
+          <span class="preview-label" data-i18n="previewLivingArea">Surf. Habitable (m²)</span>
+          <input type="number" step="any" id="prev-area" class="preview-input" placeholder="Ex: 140" />
         </div>
         <div class="preview-item">
-          <span class="preview-label" data-i18n="previewLandArea">Terrain</span>
-          <span id="prev-land" class="preview-val">-</span>
+          <span class="preview-label" data-i18n="previewLandArea">Terrain (m²)</span>
+          <input type="number" step="any" id="prev-land" class="preview-input" placeholder="Ex: 600" />
         </div>
         <div class="preview-item">
-          <span class="preview-label" data-i18n="previewRooms">Pièces / Ch.</span>
-          <span id="prev-rooms" class="preview-val">-</span>
+          <span class="preview-label" data-i18n="previewRooms">Pièces / Chambres</span>
+          <div class="preview-inline-inputs">
+            <input type="number" id="prev-rooms" class="preview-input" placeholder="Pièces" title="Nombre total de pièces" />
+            <input type="number" id="prev-bedrooms" class="preview-input" placeholder="Chambres" title="Nombre de chambres" />
+          </div>
         </div>
         <div class="preview-item">
           <span class="preview-label" data-i18n="previewBathrooms">Salles de bain</span>
-          <span id="prev-baths" class="preview-val">-</span>
+          <input type="number" id="prev-baths" class="preview-input" placeholder="Ex: 2" />
         </div>
         <div class="preview-item">
           <span class="preview-label" data-i18n="previewLocation">Localisation</span>
-          <span id="prev-location" class="preview-val">-</span>
+          <input type="text" id="prev-location" class="preview-input" placeholder="Ville (Code Postal)" />
         </div>
         <div class="preview-item">
           <span class="preview-label" data-i18n="previewDpe">DPE / GES</span>
-          <span id="prev-dpe" class="preview-val">-</span>
+          <div class="preview-inline-inputs">
+            <select id="prev-dpe" class="preview-select" title="Classe Énergie DPE">
+              <option value="">DPE: -</option>
+              <option value="A">DPE A</option>
+              <option value="B">DPE B</option>
+              <option value="C">DPE C</option>
+              <option value="D">DPE D</option>
+              <option value="E">DPE E</option>
+              <option value="F">DPE F</option>
+              <option value="G">DPE G</option>
+            </select>
+            <select id="prev-ges" class="preview-select" title="Classe Climat GES">
+              <option value="">GES: -</option>
+              <option value="A">GES A</option>
+              <option value="B">GES B</option>
+              <option value="C">GES C</option>
+              <option value="D">GES D</option>
+              <option value="E">GES E</option>
+              <option value="F">GES F</option>
+              <option value="G">GES G</option>
+            </select>
+          </div>
         </div>
         <div class="preview-item">
-          <span class="preview-label" data-i18n="previewTax">Taxe Foncière</span>
-          <span id="prev-tax" class="preview-val">-</span>
+          <span class="preview-label" data-i18n="previewTax">Taxe Foncière (€)</span>
+          <input type="number" step="any" id="prev-tax" class="preview-input" placeholder="Ex: 1100" />
         </div>
       </div>
 
-      <!-- Description Snippet -->
+      <!-- Description Snippet (Editable) -->
       <div class="preview-desc-wrapper">
         <span class="preview-label" data-i18n="previewDescription">Description</span>
-        <div id="prev-description" class="preview-desc-text">-</div>
+        <textarea id="prev-description" class="preview-textarea" rows="3" placeholder="Description de l'annonce..."></textarea>
       </div>
     </div>
 

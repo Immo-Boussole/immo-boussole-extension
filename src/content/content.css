@@ -41,8 +41,21 @@
   padding: 4px 8px;
 }
 
-.immo-boussole-detail-wrapper {
+.immo-boussole-detail-wrapper,
+.immo-boussole-action-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.immo-boussole-btn.immo-boussole-update-btn {
+  background-color: #475569;
+}
+
+.immo-boussole-btn.immo-boussole-update-btn:hover {
+  background-color: #334155;
 }
 
 .immo-boussole-toast {

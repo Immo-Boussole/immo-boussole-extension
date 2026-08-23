@@ -1,11 +1,16 @@
 import browser from 'webextension-polyfill';
 
-// English fallback dictionary in case browser.i18n is not ready or key missing
 import enMessages from '../_locales/en/messages.json';
+import frMessages from '../_locales/fr/messages.json';
 
-const fallbackDict: Record<string, string> = {};
+const enDict: Record<string, string> = {};
 for (const [k, v] of Object.entries(enMessages)) {
-  fallbackDict[k] = (v as any).message;
+  enDict[k] = (v as any).message;
+}
+
+const frDict: Record<string, string> = {};
+for (const [k, v] of Object.entries(frMessages)) {
+  frDict[k] = (v as any).message;
 }
 
 export function t(key: string, substitutions?: string | string[]): string {
@@ -15,7 +20,12 @@ export function t(key: string, substitutions?: string | string[]): string {
   } catch (e) {
     // ignore
   }
-  return fallbackDict[key] || key;
+
+  const isFr = typeof navigator !== 'undefined' && navigator.language && navigator.language.toLowerCase().startsWith('fr');
+  if (isFr && frDict[key]) {
+    return frDict[key];
+  }
+  return enDict[key] || frDict[key] || key;
 }
 
 export function localizeDocument(): void {

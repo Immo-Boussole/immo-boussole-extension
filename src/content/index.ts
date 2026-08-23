@@ -3,7 +3,7 @@ import { ExternalListingPayload, AddListingResponse, CheckListingResponse, isLis
 import { t } from '../i18n';
 import { isLeboncoin, injectLeboncoinButtons, extractLeboncoinDetailPage } from './scrapers/leboncoin';
 import { isFigaro, injectFigaroButtons, extractFigaroDetailPage } from './scrapers/figaro';
-import { isSeloger, injectSelogerButtons, extractSelogerDetailPageAsync } from './scrapers/seloger';
+import { isSeloger, injectSelogerButtons, updateSelogerButtonsState, extractSelogerDetailPageAsync } from './scrapers/seloger';
 
 // Listen for direct extraction requests (e.g. from popup "Add Current Tab")
 browser.runtime.onMessage.addListener(async (message: any): Promise<any> => {
@@ -111,16 +111,20 @@ async function checkCurrentPageListing() {
     });
 
     if (check && check.exists && check.immoBoussoleUrl) {
-      const detailBtn = document.querySelector('.immo-boussole-detail-wrapper .immo-boussole-btn') as HTMLButtonElement;
-      if (detailBtn) {
-        detailBtn.className = 'immo-boussole-btn success';
-        detailBtn.innerHTML = `${t('btnAlreadyInDb')} ↗`;
-        detailBtn.title = t('listingAlreadyExists');
-        detailBtn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          window.open(check.immoBoussoleUrl, '_blank');
-        };
+      if (isSeloger()) {
+        updateSelogerButtonsState(check.immoBoussoleUrl, sendListingToExtension);
+      } else {
+        const detailBtn = document.querySelector('.immo-boussole-detail-wrapper .immo-boussole-btn') as HTMLButtonElement;
+        if (detailBtn) {
+          detailBtn.className = 'immo-boussole-btn success';
+          detailBtn.innerHTML = `${t('btnAlreadyInDb')} ↗`;
+          detailBtn.title = t('listingAlreadyExists');
+          detailBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(check.immoBoussoleUrl, '_blank');
+          };
+        }
       }
     }
   } catch (e) {
@@ -142,12 +146,17 @@ function runInjections() {
 // Initial run
 runInjections();
 
-// Observe DOM updates for dynamic infinite scroll / SPA routing
+// Observe DOM updates for dynamic infinite scroll / SPA routing with debounce
+let observerTimeout: any = null;
 const observer = new MutationObserver(() => {
-  runInjections();
+  if (observerTimeout) clearTimeout(observerTimeout);
+  observerTimeout = setTimeout(() => {
+    runInjections();
+  }, 200);
 });
 
 observer.observe(document.body, {
   childList: true,
   subtree: true
 });
+

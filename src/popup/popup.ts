@@ -56,16 +56,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const previewThumbnails = document.getElementById('preview-thumbnails') as HTMLDivElement;
   const previewPhotosBadge = document.getElementById('preview-photos-badge') as HTMLSpanElement;
   const previewPlansBadge = document.getElementById('preview-plans-badge') as HTMLSpanElement;
-  const prevTitle = document.getElementById('prev-title') as HTMLSpanElement;
-  const prevPrice = document.getElementById('prev-price') as HTMLSpanElement;
-  const prevArea = document.getElementById('prev-area') as HTMLSpanElement;
-  const prevLand = document.getElementById('prev-land') as HTMLSpanElement;
-  const prevRooms = document.getElementById('prev-rooms') as HTMLSpanElement;
-  const prevBaths = document.getElementById('prev-baths') as HTMLSpanElement;
-  const prevLocation = document.getElementById('prev-location') as HTMLSpanElement;
-  const prevDpe = document.getElementById('prev-dpe') as HTMLSpanElement;
-  const prevTax = document.getElementById('prev-tax') as HTMLSpanElement;
-  const prevDesc = document.getElementById('prev-description') as HTMLDivElement;
+  const prevTitle = document.getElementById('prev-title') as HTMLInputElement;
+  const prevPrice = document.getElementById('prev-price') as HTMLInputElement;
+  const prevArea = document.getElementById('prev-area') as HTMLInputElement;
+  const prevLand = document.getElementById('prev-land') as HTMLInputElement;
+  const prevRooms = document.getElementById('prev-rooms') as HTMLInputElement;
+  const prevBedrooms = document.getElementById('prev-bedrooms') as HTMLInputElement;
+  const prevBaths = document.getElementById('prev-baths') as HTMLInputElement;
+  const prevLocation = document.getElementById('prev-location') as HTMLInputElement;
+  const prevDpe = document.getElementById('prev-dpe') as HTMLSelectElement;
+  const prevGes = document.getElementById('prev-ges') as HTMLSelectElement;
+  const prevTax = document.getElementById('prev-tax') as HTMLInputElement;
+  const prevDesc = document.getElementById('prev-description') as HTMLTextAreaElement;
 
   let cachedParsedPayload: any = null;
 
@@ -157,6 +159,40 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (btnOpenExistingTab) {
             btnOpenExistingTab.onclick = () => {
               browser.tabs.create({ url: check.immoBoussoleUrl, active: true });
+            };
+          }
+          const btnUpdateExistingTab = document.getElementById('btn-update-existing-tab') as HTMLButtonElement;
+          if (btnUpdateExistingTab) {
+            btnUpdateExistingTab.onclick = async () => {
+              const originalText = btnUpdateExistingTab.innerHTML;
+              btnUpdateExistingTab.innerHTML = t('btnUpdating');
+              btnUpdateExistingTab.disabled = true;
+              try {
+                let payload: any = { url: tabUrl };
+                if (tabs[0].id) {
+                  try {
+                    const extracted = await Promise.race([
+                      browser.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_LISTING' }),
+                      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500))
+                    ]);
+                    if (extracted && typeof extracted === 'object' && extracted.url) {
+                      payload = extracted;
+                    }
+                  } catch (e) {
+                    // fallback
+                  }
+                }
+                if (parsedPreviewCard && parsedPreviewCard.style.display !== 'none') {
+                  payload = collectEditedPayload(payload);
+                }
+                await sendPayloadToBackend(payload);
+              } catch (err: any) {
+                addStatusMsg.className = 'status-msg error';
+                addStatusMsg.textContent = err.message || t('addError');
+              } finally {
+                btnUpdateExistingTab.innerHTML = originalText;
+                btnUpdateExistingTab.disabled = false;
+              }
             };
           }
         }
@@ -298,6 +334,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  function collectEditedPayload(basePayload?: any): any {
+    const payload = basePayload ? { ...basePayload } : {};
+
+    if (prevTitle && prevTitle.value.trim()) payload.title = prevTitle.value.trim();
+    if (prevPrice && prevPrice.value) {
+      const p = parseFloat(prevPrice.value);
+      if (!isNaN(p)) payload.price = p;
+    }
+    if (prevArea && prevArea.value) {
+      const a = parseFloat(prevArea.value);
+      if (!isNaN(a)) payload.area = a;
+    }
+    if (prevLand && prevLand.value) {
+      const l = parseFloat(prevLand.value);
+      if (!isNaN(l)) payload.land_area = l;
+    }
+    if (prevRooms && prevRooms.value) {
+      const r = parseInt(prevRooms.value, 10);
+      if (!isNaN(r)) payload.rooms = r;
+    }
+    if (prevBedrooms && prevBedrooms.value) {
+      const b = parseInt(prevBedrooms.value, 10);
+      if (!isNaN(b)) payload.bedrooms = b;
+    }
+    if (prevBaths && prevBaths.value) {
+      const bt = parseInt(prevBaths.value, 10);
+      if (!isNaN(bt)) payload.bathroom_count = bt;
+    }
+    if (prevLocation && prevLocation.value.trim()) {
+      payload.location = prevLocation.value.trim();
+    }
+    if (prevDpe && prevDpe.value) payload.dpe_rating = prevDpe.value;
+    if (prevGes && prevGes.value) payload.ges_rating = prevGes.value;
+    if (prevTax && prevTax.value) {
+      const tx = parseFloat(prevTax.value);
+      if (!isNaN(tx)) payload.land_tax = tx;
+    }
+    if (prevDesc && prevDesc.value.trim()) {
+      payload.description = prevDesc.value.trim();
+    }
+
+    return payload;
+  }
+
   function renderParsedPreview(payload: any) {
     if (!payload) return;
     cachedParsedPayload = payload;
@@ -329,51 +409,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       previewPlansBadge.style.display = 'none';
     }
 
-    // Title
-    prevTitle.textContent = payload.title || '-';
-
-    // Price
-    if (typeof payload.price === 'number' && payload.price > 0) {
-      try {
-        prevPrice.textContent = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(payload.price);
-      } catch (e) {
-        prevPrice.textContent = `${payload.price} €`;
-      }
-    } else {
-      prevPrice.textContent = '-';
-    }
-
-    // Surfaces
-    prevArea.textContent = payload.area ? `${payload.area} m²` : '-';
-    prevLand.textContent = payload.land_area ? `${payload.land_area} m²` : '-';
-
-    // Rooms & Bedrooms
-    if (payload.rooms || payload.bedrooms) {
-      const parts: string[] = [];
-      if (payload.rooms) parts.push(`${payload.rooms} p.`);
-      if (payload.bedrooms) parts.push(`${payload.bedrooms} ch.`);
-      prevRooms.textContent = parts.join(' / ') || '-';
-    } else {
-      prevRooms.textContent = '-';
-    }
-
-    // Bathrooms
-    prevBaths.textContent = payload.bathroom_count ? `${payload.bathroom_count}` : '-';
-
-    // Location
-    prevLocation.textContent = payload.location || payload.city || '-';
-
-    // DPE / GES
-    const dpeParts: string[] = [];
-    if (payload.dpe_rating) dpeParts.push(`DPE: ${payload.dpe_rating}`);
-    if (payload.ges_rating) dpeParts.push(`GES: ${payload.ges_rating}`);
-    prevDpe.textContent = dpeParts.join(' / ') || '-';
-
-    // Taxes
-    prevTax.textContent = payload.land_tax ? `${payload.land_tax} €` : '-';
-
-    // Description
-    prevDesc.textContent = payload.description || '-';
+    // Editable Inputs
+    if (prevTitle) prevTitle.value = payload.title || '';
+    if (prevPrice) prevPrice.value = payload.price !== undefined ? String(payload.price) : '';
+    if (prevArea) prevArea.value = payload.area !== undefined ? String(payload.area) : '';
+    if (prevLand) prevLand.value = payload.land_area !== undefined ? String(payload.land_area) : '';
+    if (prevRooms) prevRooms.value = payload.rooms !== undefined ? String(payload.rooms) : '';
+    if (prevBedrooms) prevBedrooms.value = payload.bedrooms !== undefined ? String(payload.bedrooms) : '';
+    if (prevBaths) prevBaths.value = payload.bathroom_count !== undefined ? String(payload.bathroom_count) : '';
+    if (prevLocation) prevLocation.value = payload.location || payload.city || '';
+    if (prevDpe) prevDpe.value = (payload.dpe_rating || '').toUpperCase();
+    if (prevGes) prevGes.value = (payload.ges_rating || '').toUpperCase();
+    if (prevTax) prevTax.value = payload.land_tax !== undefined ? String(payload.land_tax) : '';
+    if (prevDesc) prevDesc.value = payload.description || '';
 
     parsedPreviewCard.style.display = 'block';
   }
@@ -421,17 +469,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Add current tab with rich DOM pre-extraction
+  // Add current tab with rich DOM pre-extraction & live edits
   btnAddCurrent.addEventListener('click', async () => {
     try {
       const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       if (tabs[0] && tabs[0].url) {
         let payload: any = { url: tabs[0].url };
 
-        // If user wants pre-parsed data, attempt extraction or use cached
+        // If user wants pre-parsed data, attempt extraction or use cached/edited
         if (usePreparsedCheckbox.checked) {
           if (cachedParsedPayload && cachedParsedPayload.url === tabs[0].url) {
-            payload = cachedParsedPayload;
+            payload = collectEditedPayload(cachedParsedPayload);
           } else if (tabs[0].id) {
             try {
               const extracted = await Promise.race([
@@ -445,6 +493,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (e) {
               // fallback to basic URL payload
             }
+          }
+          if (parsedPreviewCard.style.display !== 'none') {
+            payload = collectEditedPayload(payload);
           }
         } else {
           // Explicitly send only URL if unchecked
@@ -470,12 +521,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       addStatusMsg.textContent = t('invalidUrl');
       return;
     }
-    const payload: any = { url };
+    let payload: any = { url };
     if (usePreparsedCheckbox.checked && cachedParsedPayload && cachedParsedPayload.url === url) {
-      await sendPayloadToBackend(cachedParsedPayload);
-    } else {
-      await sendPayloadToBackend(payload);
+      payload = collectEditedPayload(cachedParsedPayload);
     }
+    await sendPayloadToBackend(payload);
   });
 
   function isCloudflareResponse(resp: Response, text: string): boolean {

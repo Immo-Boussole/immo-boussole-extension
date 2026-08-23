@@ -314,5 +314,25 @@
   "previewDescription": {
     "message": "Description",
     "description": "Label for description preview"
+  },
+  "previewTitle": {
+    "message": "Titre",
+    "description": "Label for title preview"
+  },
+  "btnAddListing": {
+    "message": "Ajouter à Immo-Boussole",
+    "description": "Button to add listing"
+  },
+  "btnUpdateListing": {
+    "message": "Mettre à jour dans Immo-Boussole",
+    "description": "Button to update existing listing"
+  },
+  "btnUpdating": {
+    "message": "Mise à jour...",
+    "description": "Button text while update is in progress"
+  },
+  "listingUpdatedSuccess": {
+    "message": "Annonce mise à jour avec succès dans Immo-Boussole !",
+    "description": "Success message when listing is updated"
   }
 }

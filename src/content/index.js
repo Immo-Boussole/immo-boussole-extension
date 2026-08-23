@@ -3,7 +3,7 @@ import { isListingUrl } from '../types';
 import { t } from '../i18n';
 import { isLeboncoin, injectLeboncoinButtons, extractLeboncoinDetailPage } from './scrapers/leboncoin';
 import { isFigaro, injectFigaroButtons, extractFigaroDetailPage } from './scrapers/figaro';
-import { isSeloger, injectSelogerButtons, extractSelogerDetailPageAsync } from './scrapers/seloger';
+import { isSeloger, injectSelogerButtons, updateSelogerButtonsState, extractSelogerDetailPageAsync } from './scrapers/seloger';
 // Listen for direct extraction requests (e.g. from popup "Add Current Tab")
 browser.runtime.onMessage.addListener(async (message) => {
     if (message.type === 'EXTRACT_LISTING') {
@@ -103,16 +103,21 @@ async function checkCurrentPageListing() {
             url: href
         });
         if (check && check.exists && check.immoBoussoleUrl) {
-            const detailBtn = document.querySelector('.immo-boussole-detail-wrapper .immo-boussole-btn');
-            if (detailBtn) {
-                detailBtn.className = 'immo-boussole-btn success';
-                detailBtn.innerHTML = `${t('btnAlreadyInDb')} ↗`;
-                detailBtn.title = t('listingAlreadyExists');
-                detailBtn.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.open(check.immoBoussoleUrl, '_blank');
-                };
+            if (isSeloger()) {
+                updateSelogerButtonsState(check.immoBoussoleUrl, sendListingToExtension);
+            }
+            else {
+                const detailBtn = document.querySelector('.immo-boussole-detail-wrapper .immo-boussole-btn');
+                if (detailBtn) {
+                    detailBtn.className = 'immo-boussole-btn success';
+                    detailBtn.innerHTML = `${t('btnAlreadyInDb')} ↗`;
+                    detailBtn.title = t('listingAlreadyExists');
+                    detailBtn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.open(check.immoBoussoleUrl, '_blank');
+                    };
+                }
             }
         }
     }
@@ -134,9 +139,14 @@ function runInjections() {
 }
 // Initial run
 runInjections();
-// Observe DOM updates for dynamic infinite scroll / SPA routing
+// Observe DOM updates for dynamic infinite scroll / SPA routing with debounce
+let observerTimeout = null;
 const observer = new MutationObserver(() => {
-    runInjections();
+    if (observerTimeout)
+        clearTimeout(observerTimeout);
+    observerTimeout = setTimeout(() => {
+        runInjections();
+    }, 200);
 });
 observer.observe(document.body, {
     childList: true,

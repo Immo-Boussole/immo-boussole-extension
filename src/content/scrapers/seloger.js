@@ -451,7 +451,12 @@ export function extractSelogerDetailPage() {
 export function injectSelogerButtons(onAdd) {
     if (!isSelogerDetailPage())
         return;
-    if (document.querySelector('.immo-boussole-detail-btn'))
+    const BAR_ID = 'immo-boussole-seloger-action-bar';
+    let bar = document.getElementById(BAR_ID);
+    // Remove any legacy duplicate wrappers if present
+    const oldWrappers = document.querySelectorAll('.immo-boussole-detail-wrapper:not(#' + BAR_ID + ')');
+    oldWrappers.forEach(el => el.remove());
+    if (bar)
         return;
     const anchor = document.querySelector('h1') ||
         document.querySelector('[data-test="ad-price"]') ||
@@ -459,17 +464,19 @@ export function injectSelogerButtons(onAdd) {
         document.querySelector('main header') ||
         document.querySelector('main');
     if (anchor) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'immo-boussole-detail-wrapper';
+        bar = document.createElement('div');
+        bar.id = BAR_ID;
+        bar.className = 'immo-boussole-action-bar';
         const btn = document.createElement('button');
         btn.className = 'immo-boussole-btn immo-boussole-detail-btn';
-        btn.innerHTML = `🧭 ${t('btnAddListing')}`;
-        btn.title = t('btnAddListing');
+        const label = t('btnAddListing') || t('btnAddToImmoBoussole') || 'Ajouter à Immo-Boussole';
+        btn.innerHTML = `🧭 ${label}`;
+        btn.title = label;
         btn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
             const originalText = btn.innerHTML;
-            btn.innerHTML = `🧭 ${t('btnSending')}`;
+            btn.innerHTML = `🧭 ${t('btnSending') || 'Envoi...'}`;
             try {
                 const payload = await extractSelogerDetailPageAsync();
                 onAdd(payload, btn);
@@ -480,12 +487,51 @@ export function injectSelogerButtons(onAdd) {
                 onAdd(basicPayload, btn);
             }
         });
-        wrapper.appendChild(btn);
+        bar.appendChild(btn);
         if (anchor.tagName === 'H1' || anchor.getAttribute('data-test') === 'ad-price' || anchor.className.includes('Price__')) {
-            anchor.insertAdjacentElement('afterend', wrapper);
+            anchor.insertAdjacentElement('afterend', bar);
         }
         else {
-            anchor.insertAdjacentElement('afterbegin', wrapper);
+            anchor.insertAdjacentElement('afterbegin', bar);
         }
     }
+}
+export function updateSelogerButtonsState(immoBoussoleUrl, onAdd) {
+    const BAR_ID = 'immo-boussole-seloger-action-bar';
+    const bar = document.getElementById(BAR_ID);
+    if (!bar)
+        return;
+    bar.innerHTML = '';
+    // 1. Button View in DB
+    const btnView = document.createElement('button');
+    btnView.className = 'immo-boussole-btn success';
+    btnView.innerHTML = `${t('btnAlreadyInDb')} ↗`;
+    btnView.title = t('listingAlreadyExists');
+    btnView.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.open(immoBoussoleUrl, '_blank');
+    };
+    bar.appendChild(btnView);
+    // 2. Button Update / Overwrite
+    const btnUpdate = document.createElement('button');
+    btnUpdate.className = 'immo-boussole-btn immo-boussole-update-btn';
+    btnUpdate.innerHTML = `🔄 ${t('btnUpdateListing') || 'Mettre à jour'}`;
+    btnUpdate.title = t('btnUpdateListing') || 'Mettre à jour les données dans Immo-Boussole';
+    btnUpdate.onclick = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const originalText = btnUpdate.innerHTML;
+        btnUpdate.innerHTML = `🔄 ${t('btnUpdating') || 'Mise à jour...'}`;
+        try {
+            const payload = await extractSelogerDetailPageAsync();
+            onAdd(payload, btnUpdate);
+        }
+        catch (err) {
+            btnUpdate.innerHTML = originalText;
+            const basicPayload = { url: window.location.href, source: 'seloger' };
+            onAdd(basicPayload, btnUpdate);
+        }
+    };
+    bar.appendChild(btnUpdate);
 }
