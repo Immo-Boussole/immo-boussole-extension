@@ -67,7 +67,7 @@ export function injectFigaroButtons(onAdd) {
     cardElements.forEach(card => {
         if (card.querySelector('.immo-boussole-card-btn'))
             return;
-        const linkEl = card.querySelector('a[href*="/annonce-"], a[href*="/annonces/"]');
+        const linkEl = card.querySelector('a[href*="/annonce-"], a[href*="/annonces/annonce-"]');
         if (linkEl && linkEl.href) {
             const btn = document.createElement('button');
             btn.className = 'immo-boussole-btn immo-boussole-btn-card immo-boussole-card-btn';

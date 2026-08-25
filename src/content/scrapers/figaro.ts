@@ -78,7 +78,7 @@ export function injectFigaroButtons(onAdd: (payload: ExternalListingPayload, btn
   cardElements.forEach(card => {
     if (card.querySelector('.immo-boussole-card-btn')) return;
 
-    const linkEl = card.querySelector('a[href*="/annonce-"], a[href*="/annonces/"]') as HTMLAnchorElement;
+    const linkEl = card.querySelector('a[href*="/annonce-"], a[href*="/annonces/annonce-"]') as HTMLAnchorElement;
     if (linkEl && linkEl.href) {
       const btn = document.createElement('button');
       btn.className = 'immo-boussole-btn immo-boussole-btn-card immo-boussole-card-btn';
