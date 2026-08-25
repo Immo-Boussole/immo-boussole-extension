@@ -115,6 +115,20 @@
     "message": "Cloudflare protection detected. A new tab was opened to pass the challenge. Solve it in your browser and click Retry below.",
     "description": "Message shown when Cloudflare challenge is encountered"
   },
+  "openingTabCountdown": {
+    "message": "Opening validation tab in $SECONDS$s...",
+    "description": "Countdown before opening Cloudflare verification tab",
+    "placeholders": {
+      "seconds": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "btnPopoutTitle": {
+    "message": "Open in persistent detached window",
+    "description": "Title tooltip for popout window button"
+  },
   "btnRetry": {
     "message": "🔄 Retry Connection",
     "description": "Retry connection button label"

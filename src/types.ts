@@ -2,6 +2,7 @@ export interface ExtensionConfig {
   serverUrl: string;
   apiKey: string;
   username?: string;
+  password?: string;
   activeTab?: 'apikey' | 'userpass';
   openTabAfterImport?: boolean;
   usePreparsedData?: boolean;
@@ -60,6 +61,9 @@ export function isListingUrl(url?: string): boolean {
     u.includes('ouestfrance-immo.com/immobilier/') ||
     u.includes('bellesdemeures.com/') ||
     u.includes('superimmo.com/annonces/') ||
-    u.includes('avendrealouer.fr/vente/')
+    u.includes('avendrealouer.fr/vente/') ||
+    u.includes('immoreve.fr') ||
+    u.includes('admin/crm/index.php') ||
+    u.includes('hektor')
   );
 }

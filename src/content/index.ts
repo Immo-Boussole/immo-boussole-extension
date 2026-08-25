@@ -4,6 +4,7 @@ import { t } from '../i18n';
 import { isLeboncoin, injectLeboncoinButtons, extractLeboncoinDetailPage } from './scrapers/leboncoin';
 import { isFigaro, injectFigaroButtons, extractFigaroDetailPage } from './scrapers/figaro';
 import { isSeloger, injectSelogerButtons, updateSelogerButtonsState, extractSelogerDetailPageAsync } from './scrapers/seloger';
+import { isHektor, injectHektorButtons, extractHektorDetailPage } from './scrapers/hektor';
 
 // Listen for direct extraction requests (e.g. from popup "Add Current Tab")
 browser.runtime.onMessage.addListener(async (message: any): Promise<any> => {
@@ -17,6 +18,9 @@ browser.runtime.onMessage.addListener(async (message: any): Promise<any> => {
       }
       if (isFigaro()) {
         return extractFigaroDetailPage();
+      }
+      if (isHektor()) {
+        return extractHektorDetailPage();
       }
       return { url: window.location.href };
     } catch (e: any) {
@@ -139,6 +143,8 @@ function runInjections() {
     injectFigaroButtons(sendListingToExtension);
   } else if (isSeloger()) {
     injectSelogerButtons(sendListingToExtension);
+  } else if (isHektor()) {
+    injectHektorButtons(sendListingToExtension);
   }
   checkCurrentPageListing();
 }

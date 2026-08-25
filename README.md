@@ -1,13 +1,21 @@
-# Immo-Boussole WebExtension (Firefox, Chrome, Edge)
+# 🧩 Immo-Boussole WebExtension
 
-Official browser extension for **Immo-Boussole**, compatible with **Firefox**, **Google Chrome**, and **Microsoft Edge**.
+[![Release Workflow](https://github.com/Immo-Boussole/immo-boussole-extension/actions/workflows/release.yml/badge.svg)](https://github.com/Immo-Boussole/immo-boussole-extension/actions)
+[![Wiki Documentation](https://img.shields.io/badge/docs-GitHub%20Wiki-blue?logo=github)](https://github.com/Immo-Boussole/immo-boussole/wiki)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> 🧭 **Immo-Boussole Organization**: [Core Web App](https://github.com/Immo-Boussole/immo-boussole) • [WebExtension](https://github.com/Immo-Boussole/immo-boussole-extension) • [Orchestrator](https://github.com/Immo-Boussole/immo-boussole-orchestrator) • [Central Wiki](https://github.com/Immo-Boussole/immo-boussole/wiki)
 
 ---
 
 ## 🌐 Languages
 
-- [English (Default)](README.md)
-- [Français](README.fr.md)
+- 🇬🇧 [English (Default)](README.md)
+- 🇫🇷 [Français](README.fr.md)
+
+---
+
+Official browser extension for **Immo-Boussole**, compatible with **Firefox**, **Google Chrome**, and **Microsoft Edge**.
 
 ---
 
@@ -25,11 +33,22 @@ Official browser extension for **Immo-Boussole**, compatible with **Firefox**, *
 
 ## 🌟 Features
 
-- **Integrated Action Buttons**: Automatically injects *"🧭 Add to Immo-Boussole"* buttons on listing cards in search results and directly on property detail pages across supported platforms (**LeBonCoin**, **Figaro Immobilier**).
+- **Integrated Action Buttons**: Automatically injects *"🧭 Add to Immo-Boussole"* buttons on listing cards in search results and directly on property detail pages across supported platforms (**LeBonCoin**, **Figaro Immobilier**, **SeLoger**, **Hektor / Immo-Rêve**).
 - **Smart DOM Pre-extraction**: Instantly captures title, price, area, rooms, photos, and URL without relying solely on backend network scrapers.
 - **Secure Local Storage**: Instance server URL and Bearer API Token are safely preserved in browser-isolated local storage (`browser.storage.local`).
 - **Control Popup**: Toolbar popup allowing live connection health checks, credentials setup, and single-click capture of the active browser tab.
 - **Multi-language (i18n)**: Automatically detects browser UI language (English default, French included). Easily extensible by the community ([TRANSLATING.md](TRANSLATING.md)).
+
+---
+
+## 📚 Documentation & Wiki Guides
+
+Detailed user and setup guides are available on the **[Central GitHub Wiki](https://github.com/Immo-Boussole/immo-boussole/wiki)**:
+
+| Guide | Description | Link |
+|---|---|---|
+| 🧩 **WebExtension Setup & Usage** | Complete setup and usage on Firefox, Chrome, and Edge | [Read Guide](https://github.com/Immo-Boussole/immo-boussole/wiki/WebExtension-Setup-EN) |
+| 🧭 **Architecture & Ecosystem** | Overall architecture of Immo-Boussole | [Read Guide](https://github.com/Immo-Boussole/immo-boussole/wiki/Architecture-Overview-EN) |
 
 ---
 
@@ -104,3 +123,6 @@ Want to add your language? See [TRANSLATING.md](TRANSLATING.md) for a quick step
 
 This project is licensed under the [MIT License](LICENSE).
 
+---
+
+*Part of the [Immo-Boussole](https://github.com/Immo-Boussole) organization.*

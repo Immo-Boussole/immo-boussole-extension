@@ -106,6 +106,10 @@ async function buildAll() {
     manifest.background = {
       scripts: ['background.js']
     };
+    delete manifest.side_panel;
+    if (Array.isArray(manifest.permissions)) {
+      manifest.permissions = manifest.permissions.filter((p) => p !== 'sidePanel');
+    }
   }
 
   writeFileSync(resolve(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2));

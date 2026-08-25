@@ -6,6 +6,15 @@ import { t } from '../i18n';
 // Cache of listing check statuses by tabId
 const tabListingStatusCache: Record<number, CheckListingResponse> = {};
 
+// Configure SidePanel on action click for Chrome / Edge if supported
+try {
+  if (typeof (globalThis as any).chrome !== 'undefined' && (globalThis as any).chrome?.sidePanel?.setPanelBehavior) {
+    (globalThis as any).chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
+  }
+} catch (e) {
+  // ignore
+}
+
 browser.runtime.onMessage.addListener(async (message: any, sender: any): Promise<any> => {
   if (message.type === 'CHECK_LISTING_EXISTS') {
     const tabId = sender?.tab?.id;

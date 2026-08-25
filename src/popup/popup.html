@@ -13,13 +13,16 @@
       <h1 data-i18n="popupTitle">Immo-Boussole</h1>
       <span id="ext-version" class="version-tag"></span>
     </div>
-    <span id="connection-badge" class="badge badge-disconnected" data-i18n="statusDisconnected">Disconnected</span>
+    <div class="header-right">
+      <button type="button" id="btn-popout" class="btn-popout" title="Ouvrir dans une fenêtre détachée" data-i18n-title="btnPopoutTitle">🗗</button>
+      <span id="connection-badge" class="badge badge-disconnected" data-i18n="statusDisconnected">Disconnected</span>
+    </div>
   </div>
 
   <!-- Cloudflare Alert Banner (hidden by default) -->
   <div id="cloudflare-banner" class="cloudflare-alert" style="display: none;">
     <div class="cf-icon">🛡️</div>
-    <div class="cf-text" data-i18n="cloudflareDetected">Cloudflare protection detected. A new tab was opened. Solve the verification and click Retry.</div>
+    <div id="cf-text" class="cf-text" data-i18n="cloudflareDetected">Cloudflare protection detected. A new tab was opened. Solve the verification and click Retry.</div>
     <button type="button" id="btn-retry-cf" class="btn btn-warning btn-sm" data-i18n="btnRetry">🔄 Retry Connection</button>
   </div>
 
@@ -93,11 +96,11 @@
     <p class="subtitle" data-i18n="addListingSubtitle">Add the current active tab or enter a listing URL:</p>
     
     <div class="actions-row">
-      <button type="button" id="btn-add-current" class="btn btn-action" data-i18n="btnAddCurrentTab">
-        ➕ Add Current Tab
-      </button>
       <button type="button" id="btn-parse" class="btn btn-secondary btn-parse" data-i18n="btnParseListing" title="Extract and inspect detected metadata">
         🔍 Parse & Preview
+      </button>
+      <button type="button" id="btn-add-current" class="btn btn-action" data-i18n="btnAddCurrentTab">
+        ➕ Add Current Tab
       </button>
     </div>
     

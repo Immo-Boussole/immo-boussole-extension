@@ -112,8 +112,22 @@
     "description": "Error message when login fields are missing"
   },
   "cloudflareDetected": {
-    "message": "Protection Cloudflare détectée. Un nouvel onglet a été ouvert pour valider le challenge. Validez-le dans votre navigateur puis cliquez sur Réessayer ci-dessous.",
+    "message": "Protection Cloudflare détectée. Un nouvel onglet va s'ouvrir pour valider le challenge. Validez-le dans votre navigateur puis cliquez sur Réessayer ci-dessous.",
     "description": "Message shown when Cloudflare challenge is encountered"
+  },
+  "openingTabCountdown": {
+    "message": "Ouverture de l'onglet de validation dans $SECONDS$s...",
+    "description": "Countdown before opening Cloudflare verification tab",
+    "placeholders": {
+      "seconds": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "btnPopoutTitle": {
+    "message": "Ouvrir dans une fenêtre détachée persistante",
+    "description": "Title tooltip for popout window button"
   },
   "btnRetry": {
     "message": "🔄 Réessayer la connexion",

@@ -1,13 +1,21 @@
-# Extension Web Immo-Boussole (Firefox, Chrome, Edge)
+# 🧩 Extension Web Immo-Boussole
 
-Extension officielle pour **Immo-Boussole**, compatible avec **Firefox**, **Google Chrome** et **Microsoft Edge**.
+[![Release Workflow](https://github.com/Immo-Boussole/immo-boussole-extension/actions/workflows/release.yml/badge.svg)](https://github.com/Immo-Boussole/immo-boussole-extension/actions)
+[![Documentation Wiki](https://img.shields.io/badge/docs-GitHub%20Wiki-blue?logo=github)](https://github.com/Immo-Boussole/immo-boussole/wiki)
+[![Licence: MIT](https://img.shields.io/badge/Licence-MIT-yellow.svg)](LICENSE)
+
+> 🧭 **Organisation Immo-Boussole** : [Application Web](https://github.com/Immo-Boussole/immo-boussole) • [Extension Web](https://github.com/Immo-Boussole/immo-boussole-extension) • [Orchestrateur](https://github.com/Immo-Boussole/immo-boussole-orchestrator) • [Wiki Central](https://github.com/Immo-Boussole/immo-boussole/wiki)
 
 ---
 
 ## 🌐 Langues
 
-- [English (Default)](README.md)
-- [Français](README.fr.md)
+- 🇬🇧 [English (Default)](README.md)
+- 🇫🇷 [Français](README.fr.md)
+
+---
+
+Extension officielle pour **Immo-Boussole**, compatible avec **Firefox**, **Google Chrome** et **Microsoft Edge**.
 
 ---
 
@@ -25,11 +33,22 @@ Extension officielle pour **Immo-Boussole**, compatible avec **Firefox**, **Goog
 
 ## 🌟 Fonctionnalités
 
-- **Boutons d'action intégrés** : Inscription automatique de boutons *"🧭 Ajouter à Immo-Boussole"* sur chaque carte d'annonce (recherche) et directement sur les pages d'annonces détaillées (**LeBonCoin**, **Figaro Immobilier**).
+- **Boutons d'action intégrés** : Inscription automatique de boutons *"🧭 Ajouter à Immo-Boussole"* sur chaque carte d'annonce (recherche) et directement sur les pages d'annonces détaillées (**LeBonCoin**, **Figaro Immobilier**, **SeLoger**, **Hektor / Immo-Rêve**).
 - **Pré-extraction DOM intelligente** : Capture instantanée du titre, prix, surface, nombre de pièces, photos et URL sans dépendre uniquement des requêtes réseaux du backend.
 - **Stockage local sécurisé** : L'URL de votre instance serveur et votre clé d'API Bearer Token sont conservées dans l'espace isolé sécurisé de votre navigateur (`browser.storage.local`).
 - **Popup de contrôle** : Interface dans la barre d'outils pour tester la connectivité serveur, renseigner vos identifiants et ajouter l'onglet actif en un clic.
 - **Multi-langues (i18n)** : Détection automatique de la langue du navigateur (Anglais par défaut, Français inclus). Traduction communautaire simple et ouverte ([TRANSLATING.md](TRANSLATING.md)).
+
+---
+
+## 📚 Documentation & Guides Wiki
+
+Des guides détaillés d'installation et d'utilisation sont disponibles sur le **[Wiki Central GitHub](https://github.com/Immo-Boussole/immo-boussole/wiki)** :
+
+| Guide | Description | Lien |
+|---|---|---|
+| 🧩 **Guide de l'Extension Web** | Installation et utilisation sur Firefox, Chrome et Edge | [Consulter le Guide](https://github.com/Immo-Boussole/immo-boussole/wiki/WebExtension-Setup-FR) |
+| 🧭 **Architecture & Écosystème** | Architecture globale de l'écosystème Immo-Boussole | [Consulter le Guide](https://github.com/Immo-Boussole/immo-boussole/wiki/Architecture-Overview-FR) |
 
 ---
 
@@ -103,3 +122,7 @@ Vous souhaitez traduire l'extension dans une autre langue ? Consultez [TRANSLATI
 ## 📄 Licence
 
 Ce projet est distribué sous licence [MIT](LICENSE).
+
+---
+
+*Fait partie de l'organisation [Immo-Boussole](https://github.com/Immo-Boussole).*

@@ -4,6 +4,15 @@ import { isListingUrl } from '../types';
 import { t } from '../i18n';
 // Cache of listing check statuses by tabId
 const tabListingStatusCache = {};
+// Configure SidePanel on action click for Chrome / Edge if supported
+try {
+    if (typeof globalThis.chrome !== 'undefined' && globalThis.chrome?.sidePanel?.setPanelBehavior) {
+        globalThis.chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => { });
+    }
+}
+catch (e) {
+    // ignore
+}
 browser.runtime.onMessage.addListener(async (message, sender) => {
     if (message.type === 'CHECK_LISTING_EXISTS') {
         const tabId = sender?.tab?.id;

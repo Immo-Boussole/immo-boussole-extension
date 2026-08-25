@@ -63,6 +63,33 @@ body {
   border: 1px solid #e5e7eb;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-popout {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 6px;
+  color: #6b7280;
+  line-height: 1.2;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-popout:hover {
+  background: var(--secondary-color);
+  color: var(--text-color);
+  border-color: #cbd5e1;
+}
+
 .badge {
   font-size: 11px;
   padding: 3px 8px;
@@ -375,12 +402,26 @@ body {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
+  align-items: stretch;
 }
 
 .actions-row .btn {
   flex: 1;
   padding: 8px 10px;
   font-size: 12px;
+  margin: 0;
+  min-height: 38px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.actions-row .btn-action {
+  width: auto;
+  margin-bottom: 0;
 }
 
 .btn-parse {

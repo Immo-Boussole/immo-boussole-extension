@@ -8,13 +8,14 @@ export async function getStoredConfig() {
             serverUrl: '',
             apiKey: '',
             username: '',
+            password: '',
             activeTab: 'userpass',
             openTabAfterImport: true,
             ...cfg
         };
     }
     catch {
-        return { serverUrl: '', apiKey: '', username: '', activeTab: 'userpass', openTabAfterImport: true };
+        return { serverUrl: '', apiKey: '', username: '', password: '', activeTab: 'userpass', openTabAfterImport: true };
     }
 }
 export async function saveStoredConfig(config) {

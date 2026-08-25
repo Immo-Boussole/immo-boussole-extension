@@ -12,8 +12,12 @@
   },
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "sidePanel"
   ],
+  "side_panel": {
+    "default_path": "src/popup/popup.html"
+  },
   "host_permissions": [
     "https://*.leboncoin.fr/*",
     "https://*.lefigaro.fr/*",
@@ -44,7 +48,12 @@
         "https://*.leboncoin.fr/*",
         "https://*.immobilier.lefigaro.fr/*",
         "https://immobilier.lefigaro.fr/*",
-        "https://*.seloger.com/*"
+        "https://*.seloger.com/*",
+        "https://*.immoreve.fr/*",
+        "http://*.immoreve.fr/*",
+        "https://*.ma-boite-immo.com/*",
+        "http://*.ma-boite-immo.com/*",
+        "*://*/*admin/crm/*"
       ],
       "js": ["content.js"],
       "css": ["content.css"],

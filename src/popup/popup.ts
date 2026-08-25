@@ -97,11 +97,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Detached Pop-out window button
+  const btnPopout = document.getElementById('btn-popout') as HTMLButtonElement;
+  if (btnPopout) {
+    btnPopout.addEventListener('click', async () => {
+      try {
+        const popupUrl = browser.runtime.getURL('src/popup/popup.html');
+        await browser.windows.create({
+          url: popupUrl,
+          type: 'popup',
+          width: 400,
+          height: 650
+        });
+        window.close();
+      } catch (e) {
+        console.warn('Failed to open detached window:', e);
+      }
+    });
+  }
+
+  async function getActiveWebTab(): Promise<browser.Tabs.Tab | null> {
+    try {
+      const tabs = await browser.tabs.query({ active: true, lastFocusedWindow: true });
+      if (tabs[0] && tabs[0].url && !tabs[0].url.startsWith('chrome-extension://') && !tabs[0].url.startsWith('moz-extension://')) {
+        return tabs[0];
+      }
+      const allTabs = await browser.tabs.query({ active: true });
+      const valid = allTabs.find((t) => t.url && !t.url.startsWith('chrome-extension://') && !t.url.startsWith('moz-extension://'));
+      return valid || tabs[0] || null;
+    } catch {
+      return null;
+    }
+  }
+
   // Load existing config
   const config = await getStoredConfig();
   if (config.serverUrl) serverUrlInput.value = config.serverUrl;
   if (config.apiKey) apiKeyInput.value = config.apiKey;
   if (config.username) usernameInput.value = config.username;
+  if (config.password) passwordInput.value = config.password;
 
   // Checkboxes state
   openTabCheckbox.checked = config.openTabAfterImport !== false;
@@ -136,6 +170,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     saveStoredConfig({ username: usernameInput.value.trim() });
   });
 
+  passwordInput.addEventListener('input', () => {
+    saveStoredConfig({ password: passwordInput.value });
+  });
+
   // Automatically test connection and check Cloudflare on popup opening
   if (config.serverUrl) {
     checkConnection(config.serverUrl, config.apiKey || '');
@@ -146,9 +184,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnOpenExistingTab = document.getElementById('btn-open-existing-tab') as HTMLButtonElement;
 
   try {
-    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-    if (tabs[0] && tabs[0].url) {
-      const tabUrl = tabs[0].url;
+    const tab = await getActiveWebTab();
+    if (tab && tab.url) {
+      const tabUrl = tab.url;
       if (isListingUrl(tabUrl)) {
         const check = await browser.runtime.sendMessage({
           type: 'CHECK_LISTING_EXISTS',
@@ -169,10 +207,10 @@ document.addEventListener('DOMContentLoaded', async () => {
               btnUpdateExistingTab.disabled = true;
               try {
                 let payload: any = { url: tabUrl };
-                if (tabs[0].id) {
+                if (tab.id) {
                   try {
                     const extracted = await Promise.race([
-                      browser.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_LISTING' }),
+                      browser.tabs.sendMessage(tab.id, { type: 'EXTRACT_LISTING' }),
                       new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500))
                     ]);
                     if (extracted && typeof extracted === 'object' && extracted.url) {
@@ -228,8 +266,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const username = usernameInput.value.trim();
     const password = passwordInput.value;
 
-    // Immediately persist serverUrl and username before network call
-    await saveStoredConfig({ serverUrl, username, activeTab: 'userpass' });
+    // Immediately persist serverUrl, username, and password before network call
+    await saveStoredConfig({ serverUrl, username, password, activeTab: 'userpass' });
 
     if (!serverUrl || !username || !password) {
       statusMsg.className = 'status-msg error';
@@ -284,7 +322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const apiKey = data.api_key;
         apiKeyInput.value = apiKey;
 
-        await saveStoredConfig({ serverUrl: cleanUrl, apiKey, username, activeTab: 'apikey' });
+        await saveStoredConfig({ serverUrl: cleanUrl, apiKey, username, password, activeTab: 'apikey' });
         statusMsg.className = 'status-msg success';
         statusMsg.textContent = t('loginSuccess');
         hideCloudflareBanner();
@@ -323,6 +361,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Retry Cloudflare
   btnRetryCf.addEventListener('click', async () => {
+    if (cfCountdownTimer) {
+      clearInterval(cfCountdownTimer);
+      cfCountdownTimer = null;
+    }
+    const cfTextEl = document.getElementById('cf-text');
+    if (cfTextEl) {
+      cfTextEl.textContent = t('cloudflareDetected');
+    }
     const serverUrl = serverUrlInput.value.trim();
     const apiKey = apiKeyInput.value.trim();
     if (serverUrl && apiKey) {
@@ -433,13 +479,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnParse.disabled = true;
 
     try {
-      const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-      if (tabs[0] && tabs[0].url) {
+      const tab = await getActiveWebTab();
+      if (tab && tab.url) {
         let extracted: any = null;
-        if (tabs[0].id) {
+        if (tab.id) {
           try {
             extracted = await Promise.race([
-              browser.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_LISTING' }),
+              browser.tabs.sendMessage(tab.id, { type: 'EXTRACT_LISTING' }),
               new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3500))
             ]);
           } catch (e) {
@@ -452,7 +498,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           addStatusMsg.className = 'status-msg success';
           addStatusMsg.textContent = t('preparsedTitle');
         } else {
-          renderParsedPreview({ url: tabs[0].url, title: tabs[0].title || 'Page active' });
+          renderParsedPreview({ url: tab.url, title: tab.title || 'Page active' });
           addStatusMsg.className = 'status-msg';
           addStatusMsg.textContent = t('noDataDetected');
         }
@@ -472,18 +518,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Add current tab with rich DOM pre-extraction & live edits
   btnAddCurrent.addEventListener('click', async () => {
     try {
-      const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-      if (tabs[0] && tabs[0].url) {
-        let payload: any = { url: tabs[0].url };
+      const tab = await getActiveWebTab();
+      if (tab && tab.url) {
+        let payload: any = { url: tab.url };
 
         // If user wants pre-parsed data, attempt extraction or use cached/edited
         if (usePreparsedCheckbox.checked) {
-          if (cachedParsedPayload && cachedParsedPayload.url === tabs[0].url) {
+          if (cachedParsedPayload && cachedParsedPayload.url === tab.url) {
             payload = collectEditedPayload(cachedParsedPayload);
-          } else if (tabs[0].id) {
+          } else if (tab.id) {
             try {
               const extracted = await Promise.race([
-                browser.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_LISTING' }),
+                browser.tabs.sendMessage(tab.id, { type: 'EXTRACT_LISTING' }),
                 new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500))
               ]);
               if (extracted && typeof extracted === 'object' && extracted.url) {
@@ -499,7 +545,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         } else {
           // Explicitly send only URL if unchecked
-          payload = { url: tabs[0].url };
+          payload = { url: tab.url };
         }
 
         await sendPayloadToBackend(payload);
@@ -551,24 +597,60 @@ document.addEventListener('DOMContentLoaded', async () => {
     return false;
   }
 
+  let cfCountdownTimer: any = null;
+
   function handleCloudflareChallenge(serverUrl: string) {
     configCard.classList.remove('collapsed');
     cloudflareBanner.style.display = 'flex';
     badge.className = 'badge badge-cloudflare';
     badge.textContent = t('statusCloudflare');
     statusMsg.className = 'status-msg error';
-    statusMsg.textContent = t('cloudflareDetected');
 
-    // Automatically open a new tab pointing to the server instance
-    try {
-      browser.tabs.create({ url: serverUrl, active: true });
-    } catch (e) {
-      console.warn('Could not open Cloudflare tab:', e);
+    const cleanUrl = serverUrl.replace(/\/+$/, '');
+
+    if (cfCountdownTimer) {
+      clearInterval(cfCountdownTimer);
+      cfCountdownTimer = null;
     }
+
+    let secondsLeft = 5;
+    const cfTextEl = document.getElementById('cf-text');
+    const updateCfCountdown = () => {
+      if (cfTextEl) {
+        cfTextEl.textContent = `${t('cloudflareDetected')} (${t('openingTabCountdown', [String(secondsLeft)]) || `Ouverture dans ${secondsLeft}s...`})`;
+      }
+    };
+    updateCfCountdown();
+
+    cfCountdownTimer = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft > 0) {
+        updateCfCountdown();
+      } else {
+        clearInterval(cfCountdownTimer);
+        cfCountdownTimer = null;
+        if (cfTextEl) {
+          cfTextEl.textContent = t('cloudflareDetected');
+        }
+        try {
+          browser.tabs.create({ url: cleanUrl, active: true });
+        } catch (e) {
+          console.warn('Could not open Cloudflare tab:', e);
+        }
+      }
+    }, 1000);
   }
 
   function hideCloudflareBanner() {
+    if (cfCountdownTimer) {
+      clearInterval(cfCountdownTimer);
+      cfCountdownTimer = null;
+    }
     cloudflareBanner.style.display = 'none';
+    const cfTextEl = document.getElementById('cf-text');
+    if (cfTextEl) {
+      cfTextEl.textContent = t('cloudflareDetected');
+    }
   }
 
   async function checkConnection(serverUrl: string, apiKey: string, showMsg = false) {
