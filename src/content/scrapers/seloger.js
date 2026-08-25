@@ -29,26 +29,35 @@ function extractPlatformId(url) {
 function findClassifiedObject(node, depth = 0) {
     if (!node || depth > 8 || typeof node !== 'object')
         return null;
-    // Direct classified property
+    // Direct complete classified / listing property
+    if (node.listingData && typeof node.listingData === 'object') {
+        const fromListingData = node.listingData.listing || node.listingData.classified || node.listingData;
+        if (fromListingData && typeof fromListingData === 'object')
+            return fromListingData;
+    }
     if (node.classified && typeof node.classified === 'object') {
         return node.classified;
     }
-    if (node.classifiedSummary && typeof node.classifiedSummary === 'object') {
-        return node.classifiedSummary;
+    if (node.listing && typeof node.listing === 'object') {
+        return node.listing;
     }
     // Object looking like classified (has pricing / livingArea / customTitle / id)
     if ((node.customTitle || node.headline || node.livingArea || node.pricing) &&
         (node.pricing || node.photos || node.medias || node.id)) {
         return node;
     }
-    // Check common wrapper keys
-    const priorityKeys = ['app_cldp', 'props', 'pageProps', 'data', 'initialState', 'state', 'listing'];
+    // Check common wrapper keys (prioritizing full listing/pageProps over summary)
+    const priorityKeys = ['app_cldp', 'props', 'pageProps', 'listingData', 'initialState', 'data', 'state', 'listing'];
     for (const k of priorityKeys) {
         if (node[k] && typeof node[k] === 'object') {
             const found = findClassifiedObject(node[k], depth + 1);
             if (found)
                 return found;
         }
+    }
+    // ClassifiedSummary as fallback only
+    if (node.classifiedSummary && typeof node.classifiedSummary === 'object') {
+        return node.classifiedSummary;
     }
     // General object search
     if (Array.isArray(node)) {
@@ -71,6 +80,63 @@ function findClassifiedObject(node, depth = 0) {
     }
     return null;
 }
+export function collectAllPhotosFromJson(node, depth = 0) {
+    if (!node || depth > 8)
+        return [];
+    const photos = [];
+    const isPhotoValid = (u) => {
+        if (!u || typeof u !== 'string' || !u.startsWith('http'))
+            return false;
+        const low = u.toLowerCase();
+        return !['logo', 'avatar', 'icon', 'placeholder', 'badge', 'pin-map', 'favicon', 'pixel'].some(k => low.includes(k));
+    };
+    const addCandidate = (c) => {
+        if (!c)
+            return;
+        if (typeof c === 'string') {
+            const hd = toHdImageUrl(c);
+            if (hd && isPhotoValid(hd) && !photos.includes(hd))
+                photos.push(hd);
+        }
+        else if (typeof c === 'object') {
+            for (const k of ['hdUrl', 'largeUrl', 'fullUrl', 'url', 'src', 'path', 'contentUrl', 'uri', 'original', 'large', 'big', 'url_photo', 'url_large', 'rawUrl', 'thumbnail']) {
+                if (typeof c[k] === 'string') {
+                    const hd = toHdImageUrl(c[k]);
+                    if (hd && isPhotoValid(hd) && !photos.includes(hd))
+                        photos.push(hd);
+                }
+            }
+            if (c.image)
+                addCandidate(c.image);
+        }
+    };
+    if (Array.isArray(node)) {
+        node.forEach(addCandidate);
+    }
+    else if (typeof node === 'object') {
+        for (const k of ['images', 'photos', 'medias', 'pictures', 'rawPhotos', 'gallery']) {
+            if (node[k]) {
+                if (Array.isArray(node[k]))
+                    node[k].forEach(addCandidate);
+                else if (typeof node[k] === 'object') {
+                    for (const subK of ['images', 'photos', 'all', 'large', 'list']) {
+                        if (Array.isArray(node[k][subK]))
+                            node[k][subK].forEach(addCandidate);
+                    }
+                }
+            }
+        }
+        for (const val of Object.values(node)) {
+            if (val && typeof val === 'object') {
+                collectAllPhotosFromJson(val, depth + 1).forEach(p => {
+                    if (!photos.includes(p))
+                        photos.push(p);
+                });
+            }
+        }
+    }
+    return photos;
+}
 function parseJsonScripts() {
     // 1. Check __NEXT_DATA__
     const nextDataEl = document.getElementById('__NEXT_DATA__');
@@ -79,7 +145,7 @@ function parseJsonScripts() {
             const parsed = JSON.parse(nextDataEl.textContent);
             const classified = findClassifiedObject(parsed);
             if (classified)
-                return classified;
+                return { classified, fullData: parsed };
         }
         catch (e) {
             console.warn('[Immo-Boussole] Failed to parse __NEXT_DATA__ JSON:', e);
@@ -89,12 +155,12 @@ function parseJsonScripts() {
     const jsonScripts = document.querySelectorAll('script[type="application/json"]');
     for (let i = 0; i < jsonScripts.length; i++) {
         const text = jsonScripts[i].textContent;
-        if (text && (text.includes('classified') || text.includes('pricing') || text.includes('livingArea'))) {
+        if (text && (text.includes('classified') || text.includes('pricing') || text.includes('livingArea') || text.includes('listingData'))) {
             try {
                 const parsed = JSON.parse(text);
                 const classified = findClassifiedObject(parsed);
                 if (classified)
-                    return classified;
+                    return { classified, fullData: parsed };
             }
             catch (e) {
                 // ignore
@@ -105,14 +171,14 @@ function parseJsonScripts() {
     const allScripts = document.querySelectorAll('script:not([src])');
     for (let i = 0; i < allScripts.length; i++) {
         const text = allScripts[i].textContent || '';
-        if (text.includes('classified') && (text.includes('customTitle') || text.includes('pricing'))) {
+        if (text.includes('classified') && (text.includes('customTitle') || text.includes('pricing') || text.includes('listingData'))) {
             const match = text.match(/(\{.*"classified"\s*:\s*\{.*?\}.*?\})/s) || text.match(/window\.__[A-Z_]+__\s*=\s*(\{.*?\});/s);
             if (match) {
                 try {
                     const parsed = JSON.parse(match[1]);
                     const classified = findClassifiedObject(parsed);
                     if (classified)
-                        return classified;
+                        return { classified, fullData: parsed };
                 }
                 catch (e) {
                     // ignore
@@ -120,13 +186,31 @@ function parseJsonScripts() {
             }
         }
     }
-    return null;
+    return { classified: null, fullData: null };
 }
 // Convert thumbnail / cropped SeLoger image URLs to maximum HD resolution
 export function toHdImageUrl(url) {
     if (!url || typeof url !== 'string')
         return url;
-    let hd = url;
+    let hd = url.trim();
+    if (!hd)
+        return hd;
+    // Protocol-relative URLs
+    if (hd.startsWith('//')) {
+        hd = 'https:' + hd;
+    }
+    // Next.js optimized images (/_next/image?url=https%3A%2F%2F...&w=1920&q=75)
+    if (hd.includes('/_next/image') && hd.includes('url=')) {
+        try {
+            const parsed = new URL(hd, window.location.origin);
+            const realUrl = parsed.searchParams.get('url');
+            if (realUrl)
+                hd = decodeURIComponent(realUrl);
+        }
+        catch (e) {
+            // ignore
+        }
+    }
     // Replace sizing in path (e.g. /120x90/ or /crop/120x90/ or /fit-in/300x200/)
     hd = hd.replace(/\/(?:crop|fit-in|resize|thumbnail)\/\d+x\d+\//i, '/fit-in/1920x1080/');
     hd = hd.replace(/\/\d+x\d+\//i, '/1920x1080/');
@@ -174,21 +258,24 @@ function parseJsonLdScripts() {
     }
     return null;
 }
-function extractImageUrls(mediaList) {
+export function extractImageUrls(mediaList) {
     const urls = [];
     if (!Array.isArray(mediaList))
         return urls;
     for (const item of mediaList) {
         let candidate;
-        if (typeof item === 'string' && item.startsWith('http')) {
+        if (typeof item === 'string') {
             candidate = item;
         }
         else if (item && typeof item === 'object') {
-            candidate = item.hdUrl || item.largeUrl || item.fullUrl || item.url || item.src || item.path || item.contentUrl;
+            candidate = item.hdUrl || item.largeUrl || item.fullUrl || item.url || item.src || item.path || item.contentUrl || item.uri || item.original || item.large || item.big;
+            if (!candidate && item.image) {
+                candidate = typeof item.image === 'string' ? item.image : item.image.url || item.image.src;
+            }
         }
-        if (candidate && typeof candidate === 'string' && candidate.startsWith('http')) {
+        if (candidate && typeof candidate === 'string') {
             const hd = toHdImageUrl(candidate);
-            if (!urls.includes(hd))
+            if (hd && hd.startsWith('http') && !urls.includes(hd))
                 urls.push(hd);
         }
     }
@@ -229,11 +316,14 @@ async function fetchFloorplansSubpage(baseUrl) {
                 }
             }
             // 2. Check <img> tags on floorplans subpage
-            const imgs = doc.querySelectorAll('img[src*="seloger.com"], img[src*="slstatic.com"], img[src*="poliris.net"]');
+            const imgs = doc.querySelectorAll('img[src*="seloger.com"], img[src*="slstatic.com"], img[src*="poliris.net"], img[src*="aviv"]');
             imgs.forEach(img => {
                 const src = img.src || img.getAttribute('src');
-                if (src && src.startsWith('http') && !src.includes('logo') && !src.includes('icon') && !plans.includes(src)) {
-                    plans.push(src);
+                if (src && !src.includes('logo') && !src.includes('icon')) {
+                    const norm = toHdImageUrl(src);
+                    if (norm && norm.startsWith('http') && !plans.includes(norm)) {
+                        plans.push(norm);
+                    }
                 }
             });
             if (plans.length > 0)
@@ -249,7 +339,7 @@ export async function extractSelogerDetailPageAsync() {
     const url = window.location.href;
     const platformId = extractPlatformId(url);
     const external_id = platformId ? `sl_${platformId}` : undefined;
-    const classified = parseJsonScripts();
+    const { classified, fullData } = parseJsonScripts();
     let title;
     let price;
     let area;
@@ -363,6 +453,16 @@ export async function extractSelogerDetailPageAsync() {
                 if (!photos.includes(u))
                     photos.push(u);
             });
+        }
+        // Recursive scan of classified object
+        const recursivePhotos = collectAllPhotosFromJson(classified);
+        recursivePhotos.forEach(u => { if (!photos.includes(u))
+            photos.push(u); });
+        // Recursive scan of full document JSON if available
+        if (fullData) {
+            const allJsonPhotos = collectAllPhotosFromJson(fullData);
+            allJsonPhotos.forEach(u => { if (!photos.includes(u))
+                photos.push(u); });
         }
     }
     // 2. Structured JSON-LD extraction if available
@@ -522,23 +622,59 @@ export async function extractSelogerDetailPageAsync() {
             title = parts.join(' - ');
         }
     }
-    // Fallback photo extraction from DOM images if none or very few
+    // Fallback photo extraction from DOM images & picture sources if none or very few
     if (photos.length < 3) {
-        const imgEls = document.querySelectorAll('img[src*="seloger.com"], img[src*="slstatic.com"], img[src*="poliris.net"]');
-        imgEls.forEach(img => {
-            const src = img.src || img.getAttribute('src');
-            if (src &&
-                src.startsWith('http') &&
-                !src.includes('logo') &&
-                !src.includes('avatar') &&
-                !src.includes('icon') &&
-                !src.includes('placeholder')) {
+        const imgEls = document.querySelectorAll('img, picture source');
+        imgEls.forEach(el => {
+            let src = el.src || el.getAttribute('src') || el.getAttribute('data-src') || el.getAttribute('data-lazy');
+            const srcset = el.getAttribute('srcset') || el.getAttribute('data-srcset');
+            if (srcset) {
+                const parts = srcset.split(',');
+                const lastPart = parts[parts.length - 1]?.trim().split(/\s+/)[0];
+                if (lastPart)
+                    src = lastPart;
+            }
+            if (src && !src.includes('logo') && !src.includes('avatar') && !src.includes('icon') && !src.includes('placeholder')) {
                 const hd = toHdImageUrl(src);
-                if (!photos.includes(hd)) {
+                if (hd && hd.startsWith('http') && !photos.includes(hd)) {
                     photos.push(hd);
                 }
             }
         });
+        // Check data-photos / data-gallery / data-images attributes
+        const dataContainers = document.querySelectorAll('[data-photos], [data-gallery], [data-images], [data-viewer-images], [data-media]');
+        dataContainers.forEach(el => {
+            for (const attr of ['data-photos', 'data-gallery', 'data-images', 'data-viewer-images', 'data-media']) {
+                const val = el.getAttribute(attr);
+                if (val) {
+                    try {
+                        const parsed = JSON.parse(val);
+                        const extracted = collectAllPhotosFromJson(parsed);
+                        extracted.forEach(u => { if (!photos.includes(u))
+                            photos.push(u); });
+                    }
+                    catch (e) { }
+                }
+            }
+        });
+        // Check any script tags containing photo URLs
+        if (photos.length < 3) {
+            document.querySelectorAll('script').forEach(s => {
+                const text = s.textContent || '';
+                if (text.includes('photos') || text.includes('images') || text.includes('medias') || text.includes('seloger')) {
+                    const matches = text.match(/https?:\\?\/\\?\/[^"'\s<>]+\.(?:jpg|jpeg|webp|png)(?:\?[^"'\s<>]*)?/gi);
+                    if (matches) {
+                        matches.forEach(m => {
+                            const clean = m.replace(/\\\//g, '/');
+                            const hd = toHdImageUrl(clean);
+                            if (hd && hd.startsWith('http') && !photos.includes(hd)) {
+                                photos.push(hd);
+                            }
+                        });
+                    }
+                }
+            });
+        }
     }
     // 3. Floorplans sub-page async recovery if not already found
     if (floorplans.length === 0) {
