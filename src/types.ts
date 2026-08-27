@@ -27,6 +27,9 @@ export interface ExternalListingPayload {
   ges_rating?: string;
   land_tax?: number;
   charges?: number;
+  heating_type?: string;
+  heating_mode?: string;
+  building_year?: number;
   photos?: string[];
   floorplans?: string[];
   source?: string;

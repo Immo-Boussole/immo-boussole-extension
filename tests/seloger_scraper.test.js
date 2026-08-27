@@ -27,9 +27,11 @@ const mockNextData = {
         },
         description: "Maison individuelle rénovée avec appartement indépendant...",
         propertyType: "Maison",
+        buildingYear: 1985,
         energy: {
           dpe: { grade: "A" },
-          ges: { grade: "A" }
+          ges: { grade: "A" },
+          heating: "Individuel Gaz"
         },
         domains: {
           medias: {
@@ -258,5 +260,53 @@ assert.strictEqual(parseInt(tfMatch[1], 10), 6);
 const priceMatch = testText.match(/(\d[\d\s]*\d)\s*€/);
 assert(priceMatch !== null, "Price should match");
 assert.strictEqual(parseFloat(priceMatch[1].replace(/\s/g, '')), 422000);
+
+// Test 7: Heating parser
+function parseHeatingString(text) {
+  if (!text || typeof text !== 'string') return {};
+  const t = text.trim();
+  if (!t) return {};
+  const tLow = t.toLowerCase();
+  let heating_mode;
+  if (tLow.includes('individuel')) heating_mode = 'Individuel';
+  else if (tLow.includes('collectif')) heating_mode = 'Collectif';
+
+  let heating_type;
+  if (tLow.includes('pompe à chaleur') || tLow.includes('pompe a chaleur') || /\bpac\b/i.test(tLow)) heating_type = 'Pompe à chaleur';
+  else if (tLow.includes('climatisation') || tLow.includes('clim réversible') || tLow.includes('clim reversible')) heating_type = 'Climatisation réversible';
+  else if (tLow.includes('gaz')) heating_type = 'Gaz';
+  else if (tLow.includes('électrique') || tLow.includes('electrique') || tLow.includes('convecteur') || tLow.includes('radiateur')) heating_type = 'Électrique';
+  else if (tLow.includes('fioul') || tLow.includes('fuel') || tLow.includes('mazout')) heating_type = 'Fioul';
+  else if (tLow.includes('bois') || tLow.includes('granulé') || tLow.includes('pellet') || tLow.includes('poêle') || tLow.includes('poele')) heating_type = 'Bois / Granulés';
+  else if (tLow.includes('au sol') || tLow.includes('plancher chauffant')) heating_type = 'Au sol';
+  return { heating_type, heating_mode };
+}
+
+const h1 = parseHeatingString("Individuel Gaz");
+assert.strictEqual(h1.heating_type, "Gaz");
+assert.strictEqual(h1.heating_mode, "Individuel");
+
+const h2 = parseHeatingString("Pompe à chaleur");
+assert.strictEqual(h2.heating_type, "Pompe à chaleur");
+assert.strictEqual(h2.heating_mode, undefined);
+
+const h3 = parseHeatingString("Chauffage collectif fuel");
+assert.strictEqual(h3.heating_type, "Fioul");
+assert.strictEqual(h3.heating_mode, "Collectif");
+
+// Test 8: Building year parsing
+function parseYear(val) {
+  if (val === null || val === undefined) return undefined;
+  if (typeof val === 'number') {
+    const ival = Math.floor(val);
+    return (ival >= 1700 && ival <= 2099) ? ival : undefined;
+  }
+  const m = String(val).match(/\b(1[789]\d{2}|20\d{2})\b/);
+  return m ? parseInt(m[1], 10) : undefined;
+}
+
+assert.strictEqual(parseYear(1985), 1985);
+assert.strictEqual(parseYear("Construite en 1974"), 1974);
+assert.strictEqual(parseYear("Année de construction : 2012"), 2012);
 
 console.log("✓ All SeLoger scraper unit tests PASSED successfully!");

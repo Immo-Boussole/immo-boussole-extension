@@ -23,8 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const apikeyForm = document.getElementById('apikey-form');
     const userpassForm = document.getElementById('userpass-form');
     const btnTest = document.getElementById('btn-test');
-    const btnAddCurrent = document.getElementById('btn-add-current');
-    const btnAddManual = document.getElementById('btn-add-manual');
+    const btnParse = document.getElementById('btn-parse');
     const manualUrlInput = document.getElementById('manual-url');
     const statusMsg = document.getElementById('status-message');
     const addStatusMsg = document.getElementById('add-status-message');
@@ -41,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const openTabCheckbox = document.getElementById('open-tab-checkbox');
     const usePreparsedCheckbox = document.getElementById('use-preparsed-checkbox');
     const btnViewListing = document.getElementById('btn-view-listing');
-    const btnParse = document.getElementById('btn-parse');
+    const btnImportParsed = document.getElementById('btn-import-parsed');
     // Pre-parsed Preview Card Elements
     const parsedPreviewCard = document.getElementById('parsed-preview-card');
     const previewThumbnails = document.getElementById('preview-thumbnails');
@@ -84,17 +83,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveStoredConfig({ activeTab: tab });
         }
     }
-    // Detached Pop-out window button
+    // Detached Pop-out window button handling
     const btnPopout = document.getElementById('btn-popout');
-    if (btnPopout) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDetachedWindow = urlParams.get('detached') === 'true' || window.location.hash.includes('detached');
+    if (isDetachedWindow && btnPopout) {
+        btnPopout.style.display = 'none';
+    }
+    if (btnPopout && !isDetachedWindow) {
         btnPopout.addEventListener('click', async () => {
             try {
-                const popupUrl = browser.runtime.getURL('src/popup/popup.html');
+                const currentPayload = cachedParsedPayload ? collectEditedPayload(cachedParsedPayload) : null;
+                const draftState = {
+                    manualUrl: manualUrlInput ? manualUrlInput.value : '',
+                    activeTab: tabBtnApiKey.classList.contains('active') ? 'apikey' : 'userpass',
+                    previewVisible: parsedPreviewCard ? parsedPreviewCard.style.display !== 'none' : false,
+                    payload: currentPayload,
+                    timestamp: Date.now()
+                };
+                await browser.storage.local.set({ popup_detached_state: draftState });
+                const popupUrl = browser.runtime.getURL('src/popup/popup.html?detached=true');
                 await browser.windows.create({
                     url: popupUrl,
                     type: 'popup',
-                    width: 400,
-                    height: 650
+                    width: 420,
+                    height: 700
                 });
                 window.close();
             }
@@ -162,6 +175,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Automatically test connection and check Cloudflare on popup opening
     if (config.serverUrl) {
         checkConnection(config.serverUrl, config.apiKey || '');
+    }
+    // Restore draft state if transitioning to detached window
+    try {
+        const detachedData = await browser.storage.local.get('popup_detached_state');
+        const detachedState = detachedData?.popup_detached_state;
+        if (detachedState && typeof detachedState === 'object') {
+            const isRecent = !detachedState.timestamp || (Date.now() - detachedState.timestamp < 5 * 60 * 1000);
+            if (isRecent) {
+                if (detachedState.manualUrl) {
+                    manualUrlInput.value = detachedState.manualUrl;
+                }
+                if (detachedState.activeTab) {
+                    switchTab(detachedState.activeTab);
+                }
+                if (detachedState.previewVisible && detachedState.payload) {
+                    renderParsedPreview(detachedState.payload);
+                }
+            }
+            await browser.storage.local.remove('popup_detached_state');
+        }
+    }
+    catch (e) {
+        console.warn('Could not restore detached popup state:', e);
     }
     // Check if current tab is a listing already saved in Immo-Boussole
     const alreadySavedCard = document.getElementById('already-saved-card');
@@ -359,6 +395,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     function collectEditedPayload(basePayload) {
         const payload = basePayload ? { ...basePayload } : {};
+        // Keep active photos array
+        if (cachedParsedPayload && Array.isArray(cachedParsedPayload.photos)) {
+            payload.photos = [...cachedParsedPayload.photos];
+        }
         if (prevTitle && prevTitle.value.trim())
             payload.title = prevTitle.value.trim();
         if (prevPrice && prevPrice.value) {
@@ -408,29 +448,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         return payload;
     }
-    function renderParsedPreview(payload) {
-        if (!payload)
-            return;
-        cachedParsedPayload = payload;
-        // Photos
+    function updatePhotosDisplay() {
         previewThumbnails.innerHTML = '';
-        if (payload.photos && Array.isArray(payload.photos) && payload.photos.length > 0) {
+        const photos = (cachedParsedPayload && Array.isArray(cachedParsedPayload.photos)) ? cachedParsedPayload.photos : [];
+        if (photos.length > 0) {
             previewPhotosBadge.style.display = 'inline-block';
-            previewPhotosBadge.textContent = `📸 ${payload.photos.length}`;
-            payload.photos.slice(0, 8).forEach((src) => {
+            previewPhotosBadge.textContent = `📸 ${photos.length}`;
+            previewThumbnails.style.display = 'flex';
+            photos.forEach((src, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'preview-thumb-wrapper';
                 const img = document.createElement('img');
                 img.className = 'preview-thumb';
                 img.src = src;
-                img.alt = 'Photo';
-                img.onerror = () => img.remove();
-                previewThumbnails.appendChild(img);
+                img.alt = `Photo ${index + 1}`;
+                img.onerror = () => {
+                    if (cachedParsedPayload && Array.isArray(cachedParsedPayload.photos)) {
+                        cachedParsedPayload.photos = cachedParsedPayload.photos.filter((p) => p !== src);
+                        updatePhotosDisplay();
+                    }
+                };
+                const delBtn = document.createElement('button');
+                delBtn.type = 'button';
+                delBtn.className = 'preview-thumb-delete';
+                delBtn.innerHTML = '🗑️';
+                delBtn.title = t('btnDeletePhotoTitle') || 'Exclure cette photo';
+                delBtn.setAttribute('aria-label', t('btnDeletePhotoTitle') || 'Exclure cette photo');
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (cachedParsedPayload && Array.isArray(cachedParsedPayload.photos)) {
+                        cachedParsedPayload.photos = cachedParsedPayload.photos.filter((_, idx) => idx !== index);
+                        updatePhotosDisplay();
+                    }
+                });
+                wrapper.appendChild(img);
+                wrapper.appendChild(delBtn);
+                previewThumbnails.appendChild(wrapper);
             });
-            previewThumbnails.style.display = 'flex';
         }
         else {
             previewPhotosBadge.style.display = 'none';
             previewThumbnails.style.display = 'none';
         }
+    }
+    function renderParsedPreview(payload) {
+        if (!payload)
+            return;
+        cachedParsedPayload = { ...payload };
+        if (!Array.isArray(cachedParsedPayload.photos)) {
+            cachedParsedPayload.photos = payload.photos ? [payload.photos] : [];
+        }
+        // Render photos with delete buttons
+        updatePhotosDisplay();
         // Plans (Floorplans)
         if (payload.floorplans && Array.isArray(payload.floorplans) && payload.floorplans.length > 0) {
             previewPlansBadge.style.display = 'inline-block';
@@ -471,35 +540,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         const originalText = btnParse.innerHTML;
         btnParse.innerHTML = t('btnParsing');
         btnParse.disabled = true;
+        addStatusMsg.textContent = '';
+        btnViewListing.style.display = 'none';
         try {
-            const tab = await getActiveWebTab();
-            if (tab && tab.url) {
-                let extracted = null;
-                if (tab.id) {
-                    try {
-                        extracted = await Promise.race([
-                            browser.tabs.sendMessage(tab.id, { type: 'EXTRACT_LISTING' }),
-                            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3500))
-                        ]);
-                    }
-                    catch (e) {
-                        // ignore
-                    }
+            const manualUrl = manualUrlInput.value.trim();
+            let targetTab = null;
+            let targetUrl = '';
+            if (manualUrl) {
+                targetUrl = manualUrl;
+                // Search if an open tab has this URL
+                try {
+                    const allTabs = await browser.tabs.query({});
+                    targetTab = allTabs.find((t) => t.url && (t.url === manualUrl || t.url.split('?')[0] === manualUrl.split('?')[0])) || null;
                 }
-                if (extracted && typeof extracted === 'object' && (extracted.title || extracted.price || extracted.area || extracted.photos)) {
-                    renderParsedPreview(extracted);
-                    addStatusMsg.className = 'status-msg success';
-                    addStatusMsg.textContent = t('preparsedTitle');
-                }
-                else {
-                    renderParsedPreview({ url: tab.url, title: tab.title || 'Page active' });
-                    addStatusMsg.className = 'status-msg';
-                    addStatusMsg.textContent = t('noDataDetected');
+                catch {
+                    targetTab = null;
                 }
             }
             else {
+                targetTab = await getActiveWebTab();
+                if (targetTab && targetTab.url) {
+                    targetUrl = targetTab.url;
+                    manualUrlInput.value = targetUrl;
+                }
+            }
+            if (!targetUrl) {
                 addStatusMsg.className = 'status-msg error';
                 addStatusMsg.textContent = t('activeTabError');
+                return;
+            }
+            let extracted = null;
+            if (targetTab && targetTab.id) {
+                try {
+                    extracted = await Promise.race([
+                        browser.tabs.sendMessage(targetTab.id, { type: 'EXTRACT_LISTING' }),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3500))
+                    ]);
+                }
+                catch (e) {
+                    // ignore error if tab cannot execute script
+                }
+            }
+            if (extracted && typeof extracted === 'object' && (extracted.title || extracted.price || extracted.area || (extracted.photos && extracted.photos.length > 0))) {
+                renderParsedPreview(extracted);
+                addStatusMsg.className = 'status-msg success';
+                addStatusMsg.textContent = t('preparsedTitle');
+            }
+            else {
+                renderParsedPreview({ url: targetUrl, title: targetTab?.title || 'Page' });
+                addStatusMsg.className = 'status-msg';
+                addStatusMsg.textContent = t('noDataDetected');
             }
         }
         catch (err) {
@@ -511,66 +601,45 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnParse.disabled = false;
         }
     });
-    // Add current tab with rich DOM pre-extraction & live edits
-    btnAddCurrent.addEventListener('click', async () => {
-        try {
-            const tab = await getActiveWebTab();
-            if (tab && tab.url) {
-                let payload = { url: tab.url };
-                // If user wants pre-parsed data, attempt extraction or use cached/edited
+    // Import parsed listing button handler
+    if (btnImportParsed) {
+        btnImportParsed.addEventListener('click', async () => {
+            const originalText = btnImportParsed.innerHTML;
+            btnImportParsed.innerHTML = t('btnSending');
+            btnImportParsed.disabled = true;
+            try {
+                let payload = { url: manualUrlInput.value.trim() };
+                if (!payload.url && cachedParsedPayload?.url) {
+                    payload.url = cachedParsedPayload.url;
+                }
+                if (!payload.url) {
+                    const tab = await getActiveWebTab();
+                    if (tab?.url)
+                        payload.url = tab.url;
+                }
                 if (usePreparsedCheckbox.checked) {
-                    if (cachedParsedPayload && cachedParsedPayload.url === tab.url) {
-                        payload = collectEditedPayload(cachedParsedPayload);
-                    }
-                    else if (tab.id) {
-                        try {
-                            const extracted = await Promise.race([
-                                browser.tabs.sendMessage(tab.id, { type: 'EXTRACT_LISTING' }),
-                                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500))
-                            ]);
-                            if (extracted && typeof extracted === 'object' && extracted.url) {
-                                payload = extracted;
-                                renderParsedPreview(payload);
-                            }
-                        }
-                        catch (e) {
-                            // fallback to basic URL payload
-                        }
-                    }
-                    if (parsedPreviewCard.style.display !== 'none') {
-                        payload = collectEditedPayload(payload);
-                    }
+                    payload = collectEditedPayload(cachedParsedPayload || payload);
                 }
                 else {
-                    // Explicitly send only URL if unchecked
-                    payload = { url: tab.url };
+                    payload = { url: payload.url };
+                }
+                if (!payload.url) {
+                    addStatusMsg.className = 'status-msg error';
+                    addStatusMsg.textContent = t('invalidUrl');
+                    return;
                 }
                 await sendPayloadToBackend(payload);
             }
-            else {
+            catch (err) {
                 addStatusMsg.className = 'status-msg error';
-                addStatusMsg.textContent = t('activeTabError');
+                addStatusMsg.textContent = err.message || t('addError');
             }
-        }
-        catch (err) {
-            addStatusMsg.className = 'status-msg error';
-            addStatusMsg.textContent = err.message || t('addError');
-        }
-    });
-    // Add manual URL
-    btnAddManual.addEventListener('click', async () => {
-        const url = manualUrlInput.value.trim();
-        if (!url) {
-            addStatusMsg.className = 'status-msg error';
-            addStatusMsg.textContent = t('invalidUrl');
-            return;
-        }
-        let payload = { url };
-        if (usePreparsedCheckbox.checked && cachedParsedPayload && cachedParsedPayload.url === url) {
-            payload = collectEditedPayload(cachedParsedPayload);
-        }
-        await sendPayloadToBackend(payload);
-    });
+            finally {
+                btnImportParsed.innerHTML = originalText;
+                btnImportParsed.disabled = false;
+            }
+        });
+    }
     function isCloudflareResponse(resp, text) {
         if (resp.redirected && (resp.url.includes('cloudflareaccess.com') || resp.url.includes('cloudflare.com'))) {
             return true;

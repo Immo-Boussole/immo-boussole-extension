@@ -342,6 +342,127 @@ async function fetchFloorplansSubpage(baseUrl: string): Promise<string[]> {
   return plans;
 }
 
+export function parseHeatingString(text?: string | null): { heating_type?: string; heating_mode?: string } {
+  if (!text || typeof text !== 'string') return {};
+  const t = text.trim();
+  if (!t) return {};
+  const tLow = t.toLowerCase();
+  let heating_mode: string | undefined;
+  if (tLow.includes('individuel')) heating_mode = 'Individuel';
+  else if (tLow.includes('collectif')) heating_mode = 'Collectif';
+
+  let heating_type: string | undefined;
+  if (tLow.includes('pompe à chaleur') || tLow.includes('pompe a chaleur') || /\bpac\b/i.test(tLow)) heating_type = 'Pompe à chaleur';
+  else if (tLow.includes('climatisation') || tLow.includes('clim réversible') || tLow.includes('clim reversible')) heating_type = 'Climatisation réversible';
+  else if (tLow.includes('gaz')) heating_type = 'Gaz';
+  else if (tLow.includes('électrique') || tLow.includes('electrique') || tLow.includes('convecteur') || tLow.includes('radiateur')) heating_type = 'Électrique';
+  else if (tLow.includes('fioul') || tLow.includes('fuel') || tLow.includes('mazout')) heating_type = 'Fioul';
+  else if (tLow.includes('bois') || tLow.includes('granulé') || tLow.includes('pellet') || tLow.includes('poêle') || tLow.includes('poele')) heating_type = 'Bois / Granulés';
+  else if (tLow.includes('au sol') || tLow.includes('plancher chauffant')) heating_type = 'Au sol';
+  else if (tLow.includes('solaire')) heating_type = 'Solaire';
+  else if (tLow.includes('urbain') || tLow.includes('géothermie') || tLow.includes('geothermie')) heating_type = 'Géothermie / Réseau urbain';
+  else if (!heating_mode && t.length < 40) {
+    heating_type = t.charAt(0).toUpperCase() + t.slice(1);
+  }
+  return { heating_type, heating_mode };
+}
+
+export function parseYear(val: any): number | undefined {
+  if (val === null || val === undefined) return undefined;
+  if (typeof val === 'number') {
+    const ival = Math.floor(val);
+    return (ival >= 1700 && ival <= 2099) ? ival : undefined;
+  }
+  const m = String(val).match(/\b(1[789]\d{2}|20\d{2})\b/);
+  return m ? parseInt(m[1], 10) : undefined;
+}
+
+export function extractBuildingYearFromJson(node: any, depth = 0): number | undefined {
+  if (!node || depth > 8 || typeof node !== 'object') return undefined;
+  for (const k of ['buildingYear', 'constructionYear', 'yearBuilt', 'anneeConstruction', 'year']) {
+    if (node[k] !== undefined && node[k] !== null) {
+      const y = parseYear(node[k]);
+      if (y) return y;
+    }
+  }
+  if (node.building) {
+    const y = extractBuildingYearFromJson(node.building, depth + 1);
+    if (y) return y;
+  }
+  if (node.general) {
+    const y = extractBuildingYearFromJson(node.general, depth + 1);
+    if (y) return y;
+  }
+  for (const k of ['criterias', 'criteria', 'characteristics', 'features', 'tags', 'specifications']) {
+    if (Array.isArray(node[k])) {
+      for (const item of node[k]) {
+        if (typeof item === 'object' && item) {
+          const label = String(item.label || item.key || item.name || item.title || '').toLowerCase();
+          if (label.includes('construction') || label.includes('annee') || label.includes('année') || label.includes('year')) {
+            const y = parseYear(item.value || item.text || item.val);
+            if (y) return y;
+          }
+        } else if (typeof item === 'string' && (item.includes('construction') || item.includes('année') || item.includes('annee'))) {
+          const y = parseYear(item);
+          if (y) return y;
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
+export function extractHeatingFromJson(node: any, depth = 0): { heating_type?: string; heating_mode?: string } {
+  if (!node || depth > 8 || typeof node !== 'object') return {};
+  let heating_type: string | undefined;
+  let heating_mode: string | undefined;
+  const energy = node.energy;
+  if (typeof energy === 'object' && energy) {
+    for (const k of ['heating', 'heatingType', 'heatingMode', 'heatingSystem']) {
+      if (energy[k]) {
+        const res = parseHeatingString(String(energy[k]));
+        if (res.heating_type && !heating_type) heating_type = res.heating_type;
+        if (res.heating_mode && !heating_mode) heating_mode = res.heating_mode;
+      }
+    }
+  }
+  for (const k of ['heating', 'heatingType', 'heatingMode', 'heatingSystem', 'chauffage']) {
+    if (node[k]) {
+      if (typeof node[k] === 'object') {
+        const res1 = parseHeatingString(String(node[k].type || node[k].label || node[k].value || ''));
+        const res2 = parseHeatingString(String(node[k].mode || ''));
+        if (res1.heating_type && !heating_type) heating_type = res1.heating_type;
+        if (res2.heating_type && !heating_type) heating_type = res2.heating_type;
+        if (res1.heating_mode && !heating_mode) heating_mode = res1.heating_mode;
+        if (res2.heating_mode && !heating_mode) heating_mode = res2.heating_mode;
+      } else {
+        const res = parseHeatingString(String(node[k]));
+        if (res.heating_type && !heating_type) heating_type = res.heating_type;
+        if (res.heating_mode && !heating_mode) heating_mode = res.heating_mode;
+      }
+    }
+  }
+  for (const k of ['criterias', 'criteria', 'characteristics', 'features', 'tags', 'specifications']) {
+    if (Array.isArray(node[k])) {
+      for (const item of node[k]) {
+        if (typeof item === 'object' && item) {
+          const label = String(item.label || item.key || item.name || item.title || '').toLowerCase();
+          if (label.includes('chauffage') || label.includes('heating')) {
+            const res = parseHeatingString(String(item.value || item.text || item.val || ''));
+            if (res.heating_type && !heating_type) heating_type = res.heating_type;
+            if (res.heating_mode && !heating_mode) heating_mode = res.heating_mode;
+          }
+        } else if (typeof item === 'string' && item.toLowerCase().includes('chauffage')) {
+          const res = parseHeatingString(item);
+          if (res.heating_type && !heating_type) heating_type = res.heating_type;
+          if (res.heating_mode && !heating_mode) heating_mode = res.heating_mode;
+        }
+      }
+    }
+  }
+  return { heating_type, heating_mode };
+}
+
 export async function extractSelogerDetailPageAsync(): Promise<ExternalListingPayload> {
   const url = window.location.href;
   const platformId = extractPlatformId(url);
@@ -365,6 +486,9 @@ export async function extractSelogerDetailPageAsync(): Promise<ExternalListingPa
   let ges_rating: string | undefined;
   let land_tax: number | undefined;
   let charges: number | undefined;
+  let heating_type: string | undefined;
+  let heating_mode: string | undefined;
+  let building_year: number | undefined;
   const photos: string[] = [];
   const floorplans: string[] = [];
 
@@ -450,6 +574,17 @@ export async function extractSelogerDetailPageAsync(): Promise<ExternalListingPa
       const num = typeof ch === 'string' ? parseFloat(ch.replace(/[^\d.]/g, '')) : Number(ch);
       if (!isNaN(num) && num >= 0) charges = num;
     }
+
+    // Building Year & Heating from JSON
+    const bYear = extractBuildingYearFromJson(classified) || (fullData ? extractBuildingYearFromJson(fullData) : undefined);
+    if (bYear) building_year = bYear;
+
+    let hInfo = extractHeatingFromJson(classified);
+    if (!hInfo.heating_type && !hInfo.heating_mode && fullData) {
+      hInfo = extractHeatingFromJson(fullData);
+    }
+    if (hInfo.heating_type) heating_type = hInfo.heating_type;
+    if (hInfo.heating_mode) heating_mode = hInfo.heating_mode;
 
     // Photos
     const rawImages = classified.domains?.medias?.images || classified.medias?.images || classified.photos || classified.pictures;
@@ -616,6 +751,26 @@ export async function extractSelogerDetailPageAsync(): Promise<ExternalListingPa
     if (taxMatch) land_tax = parseFloat(taxMatch[1].replace(',', '.'));
   }
 
+  // Building Year & Heating DOM & Text Fallbacks
+  if (!building_year) {
+    const yearMatch = pageText.match(/(?:année(?:\s*de)?\s*construction|construite?\s*(?:en|dans\s*les\s*années)?|bâtie?\s*en)\s*[:\s]*(\d{4})\b/i) || pageText.match(/\bconstruction\s*(?:de\s*)?(\d{4})\b/i);
+    if (yearMatch) building_year = parseYear(yearMatch[1]);
+  }
+
+  if (!heating_type) {
+    const heatMatch = pageText.match(/chauffage\s*(?:[:\s]|est\s*de\s*type\s*)?\s*([a-zA-ZÀ-ÿ\s\(\)\/]+?)(?:\.|\n|,|$|;)/i);
+    if (heatMatch) {
+      const res = parseHeatingString(heatMatch[0]);
+      if (res.heating_type) heating_type = res.heating_type;
+      if (res.heating_mode && !heating_mode) heating_mode = res.heating_mode;
+    }
+    if (!heating_type) {
+      const res = parseHeatingString(pageText);
+      if (res.heating_type) heating_type = res.heating_type;
+      if (res.heating_mode && !heating_mode) heating_mode = res.heating_mode;
+    }
+  }
+
   // Synthesize a descriptive title if empty or too generic
   if (!title || title.length < 15 || /^Maison|Appartement$/i.test(title.trim())) {
     const parts = [
@@ -711,6 +866,9 @@ export async function extractSelogerDetailPageAsync(): Promise<ExternalListingPa
     ges_rating,
     land_tax,
     charges,
+    heating_type,
+    heating_mode,
+    building_year,
     photos: photos.length > 0 ? photos : undefined,
     floorplans: floorplans.length > 0 ? floorplans : undefined,
     source: 'seloger'

@@ -348,5 +348,25 @@
   "listingUpdatedSuccess": {
     "message": "Listing successfully updated in Immo-Boussole!",
     "description": "Success message when listing is updated"
+  },
+  "btnImportParsed": {
+    "message": "➕ Import to Immo-Boussole",
+    "description": "Button to import the parsed and validated listing"
+  },
+  "btnDeletePhotoTitle": {
+    "message": "Exclude this photo from import",
+    "description": "Tooltip for the red trash button on photo thumbnails"
+  },
+  "btnParseAction": {
+    "message": "🔍 Parse & Preview",
+    "description": "Primary action button to parse listing before import"
+  },
+  "btnParseActionTitle": {
+    "message": "Extract listing data from current tab or URL",
+    "description": "Tooltip for parsing action button"
+  },
+  "manualUrlLabel": {
+    "message": "Listing URL (optional if active tab is a listing):",
+    "description": "Label/subtitle for manual URL input"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "immo-boussole-extension",
-  "version": "1.0.0",
+  "version": "1.0.37",
   "type": "module",
   "description": "Browser extension for Firefox, Chrome, and Edge to submit listings to Immo-Boussole",
   "scripts": {

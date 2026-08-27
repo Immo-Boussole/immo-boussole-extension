@@ -93,20 +93,16 @@
 
   <div class="card">
     <h2 data-i18n="addListingHeader">Add Listing</h2>
-    <p class="subtitle" data-i18n="addListingSubtitle">Add the current active tab or enter a listing URL:</p>
+    <p class="subtitle" data-i18n="manualUrlLabel">Listing URL (optional if active tab is a listing):</p>
     
+    <div class="manual-input-single">
+      <input type="url" id="manual-url" data-i18n-placeholder="manualUrlPlaceholder" placeholder="https://www.leboncoin.fr/ad/..." />
+    </div>
+
     <div class="actions-row">
-      <button type="button" id="btn-parse" class="btn btn-secondary btn-parse" data-i18n="btnParseListing" title="Extract and inspect detected metadata">
+      <button type="button" id="btn-parse" class="btn btn-action btn-parse-main" data-i18n="btnParseAction" data-i18n-title="btnParseActionTitle" title="Extract listing data from current tab or URL">
         🔍 Parse & Preview
       </button>
-      <button type="button" id="btn-add-current" class="btn btn-action" data-i18n="btnAddCurrentTab">
-        ➕ Add Current Tab
-      </button>
-    </div>
-    
-    <div class="manual-input">
-      <input type="url" id="manual-url" data-i18n-placeholder="manualUrlPlaceholder" placeholder="https://www.leboncoin.fr/ad/..." />
-      <button type="button" id="btn-add-manual" class="btn btn-secondary" data-i18n="btnAddManual">Add</button>
     </div>
 
     <!-- Pre-parsed Listing Data Preview Panel (Collapsible with editable inputs) -->
@@ -194,17 +190,23 @@
         <span class="preview-label" data-i18n="previewDescription">Description</span>
         <textarea id="prev-description" class="preview-textarea" rows="3" placeholder="Description de l'annonce..."></textarea>
       </div>
-    </div>
 
-    <div class="checkbox-container">
-      <label class="checkbox-label" title="Si coché, transmet l'ensemble des données pré-parsées (photos HD, plans, caractéristiques) au serveur">
-        <input type="checkbox" id="use-preparsed-checkbox" checked />
-        <span data-i18n="usePreparsedDataLabel">Importer l'annonce avec ces infos pré-parsées</span>
-      </label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="open-tab-checkbox" checked />
-        <span data-i18n="openTabAfterImport">Ouvrir un nouvel onglet après l'import</span>
-      </label>
+      <div class="checkbox-container">
+        <label class="checkbox-label" title="Si coché, transmet l'ensemble des données pré-parsées (photos HD, plans, caractéristiques) au serveur">
+          <input type="checkbox" id="use-preparsed-checkbox" checked />
+          <span data-i18n="usePreparsedDataLabel">Importer l'annonce avec ces infos pré-parsées</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="open-tab-checkbox" checked />
+          <span data-i18n="openTabAfterImport">Ouvrir un nouvel onglet après l'import</span>
+        </label>
+      </div>
+
+      <div class="preview-actions">
+        <button type="button" id="btn-import-parsed" class="btn btn-action btn-import-main" data-i18n="btnImportParsed">
+          ➕ Importer dans Immo-Boussole
+        </button>
+      </div>
     </div>
 
     <div id="add-status-message" class="status-msg"></div>

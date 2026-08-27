@@ -2,6 +2,7 @@ import { build } from 'vite';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { copyFileSync, cpSync, mkdirSync, existsSync, readFileSync, writeFileSync, rmSync } from 'fs';
+import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -79,7 +80,7 @@ async function buildAll() {
   const manifestRaw = readFileSync(resolve(rootDir, 'src/manifest.json'), 'utf-8');
   const manifest = JSON.parse(manifestRaw);
 
-  // Dynamic version injection from ENV / CI / package.json
+  // Dynamic version injection from ENV / CI / Git tags / package.json
   let version = process.env.EXTENSION_VERSION;
   if (!version && process.env.GITHUB_REF_TYPE === 'tag' && process.env.GITHUB_REF_NAME) {
     version = process.env.GITHUB_REF_NAME.replace(/^v/, '');
@@ -88,6 +89,16 @@ async function buildAll() {
     const baseVer = pkg.version ? pkg.version.split('.').slice(0, 2).join('.') : '1.0';
     version = `${baseVer}.${process.env.GITHUB_RUN_NUMBER}`;
   } else if (!version) {
+    try {
+      const gitTag = execSync('git describe --tags --abbrev=0', { cwd: rootDir, encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+      if (gitTag) {
+        version = gitTag.replace(/^v/, '');
+      }
+    } catch {
+      // ignore
+    }
+  }
+  if (!version) {
     const pkg = JSON.parse(readFileSync(resolve(rootDir, 'package.json'), 'utf-8'));
     version = pkg.version || '1.0.0';
   }
